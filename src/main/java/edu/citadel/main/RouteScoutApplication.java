@@ -9,10 +9,10 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @ComponentScan(value = {"edu.citadel"})
 @SpringBootApplication
-public class RestApiApplication {
+public class RouteScoutApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(RestApiApplication.class, args);
+		SpringApplication.run(RouteScoutApplication.class, args);
 	}
 
 }
