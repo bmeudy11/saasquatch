@@ -25,3 +25,6 @@
 /nbdist/
 /.nb-gradle/
 /build/
+
+###ignore yaml files that may include secrets
+!/src/main/resources/*.yaml
