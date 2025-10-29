@@ -7,7 +7,7 @@ public class RouteScoutAgent {
     private Client genaiClient;
     private String modelName = "gemini-2.5-pro";
 
-    public RouteScoutAgent(Client genaiClient) {
+    public RouteScoutAgent() {
         this.genaiClient = new Client();
     }
 

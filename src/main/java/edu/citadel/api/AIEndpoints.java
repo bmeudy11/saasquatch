@@ -7,8 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-
-
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/suggest")
@@ -17,21 +16,13 @@ public class AIEndpoints {
     private final RouteScoutAgent routeScoutAgent;
 
     public AIEndpoints() {
-        // Initialize RouteScoutAgent with a Gemini client
-        Client genaiClient = new Client();
-        this.routeScoutAgent = new RouteScoutAgent(genaiClient);
+        this.routeScoutAgent = new RouteScoutAgent();
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Object> getSuggestions() {
-        // Create a sample JSON response
         var response = new java.util.HashMap<String, Object>();
-        response.put("status", "success");
-        response.put("message", "Suggestions retrieved successfully");
-        response.put("data", java.util.List.of(
-                java.util.Map.of("id", 1, "suggestion", "Sample suggestion 1"),
-                java.util.Map.of("id", 2, "suggestion", "Sample suggestion 2")
-        ));
+        response.put("status", "Service available");
 
         return ResponseEntity.ok(response);
     }
