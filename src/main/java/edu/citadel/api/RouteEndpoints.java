@@ -20,9 +20,13 @@ import java.util.Arrays;
 @RestController
 @RequestMapping("/route")
 public class RouteEndpoints {
+    private final GeoApiContext context;
 
-    // Store the API key and create an object for Google Maps
-    private final GeoApiContext context = new GeoApiContext.Builder().apiKey(APIKeys.MAPS_API_KEY.getKey()).build();
+    public RouteEndpoints(APIKeys apiKeys) {
+        this.context = new GeoApiContext.Builder()
+                .apiKey(apiKeys.getMapsApiKey())
+                .build();
+    }
 
     // Accepts a POST request with origin and destination Strings (e.g. "Charleston, SC")
     @PostMapping("/generateRoute")

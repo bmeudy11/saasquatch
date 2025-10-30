@@ -1,16 +1,12 @@
 package edu.citadel.dal.keys;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import lombok.Getter;
 
-// Add all API Keys for external APIs here
+@Component
 @Getter
-public enum APIKeys {
-    MAPS_API_KEY("AIzaSyBjy_tKlWZTAXv4WYra5dr7e-0wcPEzvec");
-
-    private final String key;
-
-    APIKeys(String key) {
-        this.key = key;
-    }
-
+public class APIKeys {
+    @Value("${google.maps.key}")
+    private String mapsApiKey;
 }
