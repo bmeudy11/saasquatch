@@ -46,6 +46,8 @@ The `accounts` table stores user account information:
 
 All account endpoints are prefixed with `/account`.
 
+> **Note**: In iteration 1, API responses include the password field. This is a known limitation that will be addressed in future iterations. See the Security Considerations section below.
+
 #### Create Account
 - **Method**: `POST`
 - **Path**: `/account`
@@ -187,12 +189,34 @@ Run the test suite:
 ./mvnw test
 ```
 
+## Security Considerations
+
+**⚠️ Important Security Notes for Iteration 1:**
+
+This iteration serves as a foundational implementation. The following security improvements are planned for future iterations:
+
+1. **Password Storage**: Currently passwords are stored as plain text in VARCHAR(50) fields. Future iterations will implement:
+   - Secure password hashing (bcrypt or Argon2)
+   - Increased field length to accommodate hashed passwords (60+ characters)
+
+2. **Password in API Responses**: Currently the password field is returned in API responses. Future iterations will:
+   - Exclude password fields from all API responses
+   - Use DTOs (Data Transfer Objects) to control response fields
+
+3. **Authentication & Authorization**: Future iterations will implement:
+   - JWT-based authentication
+   - Role-based access control
+   - Session management
+
+**These security enhancements are intentionally deferred to keep iteration 1 focused on foundational functionality.**
+
 ## What's Next?
 
 Future iterations will include:
 - Route planning features
-- Authentication and authorization
-- Password encryption
+- Authentication and authorization (JWT-based)
+- Password encryption and secure hashing (bcrypt/Argon2)
+- Exclusion of sensitive data from API responses
 - Additional user management features (update, delete)
 - Route sharing and collaboration
 - Geographic data integration
