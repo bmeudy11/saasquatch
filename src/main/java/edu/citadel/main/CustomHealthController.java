@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
-//reconfigured the "health" endpoint with metrics and values
+//reconfigured the "health" endpoint with metrics
 @RestController
 public class CustomHealthController {
 

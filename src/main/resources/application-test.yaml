@@ -15,13 +15,13 @@ management:
       exposure:
         include: openapi, swagger-ui
 server:
-  port: 25060
+  port: 5001
 spring:
   application:
     name: csci-602
   datasource:
     password: {password}
-    url: jdbc:postgresql://routescout-do-user-24655966-0.m.db.ondigitalocean.com:25060/defaultdb
+    url: jdbc:postgresql://something.com:5001/{default}
     username: {username}
   flyway:
     enabled: false
