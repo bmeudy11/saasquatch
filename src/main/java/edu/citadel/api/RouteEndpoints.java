@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/route")
@@ -26,6 +27,54 @@ public class RouteEndpoints {
         this.context = new GeoApiContext.Builder()
                 .apiKey(apiKeys.getMapsApiKey())
                 .build();
+    }
+
+    private String makeHumanReadable(String instruction) {
+        String cleaned = instruction
+                // Add spaces around tags so words don't merge when tags are removed
+                .replaceAll("(?<=[a-zA-Z])<", " <")
+                .replaceAll(">(?=[a-zA-Z])", "> ");
+
+        // Remove all HTML tags
+        cleaned = cleaned.replaceAll("<[^>]*>", "");
+
+        // Add missing punctuation between street names and "Destination..."
+        cleaned = cleaned.replaceAll(
+                "(?i)\\b(Ct|St|Rd|Dr|Blvd|Ln|Way|Ave|Pkwy|Cir|Pl|Ter)\\b(\\s*Destination)",
+                "$1. $2"
+        );
+
+        // Remove spaces around slashes
+        cleaned = cleaned.replaceAll("\\s*/\\s*", "/");
+
+        // Normalize spaces
+        cleaned = cleaned.replaceAll("\\s+", " ").trim();
+
+        // Add sentence breaks for readability
+        cleaned = cleaned.replaceAll(
+                "(,\\s*)(?=(Turn|Merge|Keep|Continue|Head|Take|At|Slight|Follow))",
+                ". "
+        );
+        cleaned = cleaned.replaceAll(
+                "(\\s+and\\s+)(?=(merge|turn|continue|keep|head|take|follow))",
+                ". "
+        );
+
+        // Remove unwanted spaces before commas or closing parentheses
+        cleaned = cleaned.replaceAll("\\s+,", ",");
+        cleaned = cleaned.replaceAll("\\s+\\)", ")");
+
+        // Capitalize each sentence after a period
+        cleaned = Arrays.stream(cleaned.split("(?<=\\.)\\s+"))
+                .map(s -> s.substring(0, 1).toUpperCase() + s.substring(1))
+                .collect(Collectors.joining(" "));
+
+        // Ensure each instruction ends with a period
+        if (!cleaned.endsWith(".")) {
+            cleaned += ".";
+        }
+
+        return cleaned;
     }
 
     // Accepts a POST request with origin and destination Strings (e.g. "Charleston, SC")
@@ -43,8 +92,8 @@ public class RouteEndpoints {
             ArrayList<String> instructions = new ArrayList<>();
             Arrays.stream(result.routes[0].legs).forEach((leg ->
                     Arrays.stream(leg.steps).forEach((step -> {
-                        String noHtmlTags = step.htmlInstructions.replaceAll("<[^>]*>", "");
-                        instructions.add(noHtmlTags);
+                        String instruction = makeHumanReadable(step.htmlInstructions);
+                        instructions.add(instruction);
                     }))
             ));
 
