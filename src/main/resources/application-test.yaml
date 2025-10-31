@@ -21,7 +21,7 @@ spring:
     name: csci-602
   datasource:
     password: {password}
-    url: jdbc:postgresql://something.com:5001/{default}
+    url: jdbc:postgresql://ccba8a0vn4fb2p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/{database}
     username: {username}
   flyway:
     enabled: false

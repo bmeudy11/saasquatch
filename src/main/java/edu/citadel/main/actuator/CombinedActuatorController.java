@@ -34,7 +34,7 @@
 ////    }
 ////
 ////}
-// includes metric vals
+// includes metric values
 //@RestController
 //public class CombinedActuatorController {
 //
