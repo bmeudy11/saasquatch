@@ -20,9 +20,9 @@ spring:
   application:
     name: csci-602
   datasource:
-    password: AVNS_O7srcZW4e6Te0mnUgQo
+    password: {password}
     url: jdbc:postgresql://routescout-do-user-24655966-0.m.db.ondigitalocean.com:25060/defaultdb
-    username: doadmin
+    username: {username}
   flyway:
     enabled: false
   mvc:
