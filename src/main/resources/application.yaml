@@ -15,14 +15,14 @@ management:
       exposure:
         include: openapi, swagger-ui
 server:
-  port: 5001
+  port: 25060
 spring:
   application:
     name: csci-602
   datasource:
-    password: {password}
-    url: jdbc:postgresql://ccba8a0vn4fb2p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/{database}
-    username: {username}
+    password: AVNS_O7srcZW4e6Te0mnUgQo
+    url: jdbc:postgresql://routescout-do-user-24655966-0.m.db.ondigitalocean.com:25060/defaultdb
+    username: doadmin
   mvc:
     servlet:
       load-on-startup: 1
