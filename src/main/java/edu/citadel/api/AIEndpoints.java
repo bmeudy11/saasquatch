@@ -1,22 +1,23 @@
 package edu.citadel.api;
 
-
-import com.google.genai.Client;
 import edu.citadel.main.RouteScoutAgent;
+import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/suggest")
 public class AIEndpoints {
+    private static final Logger logger = LoggerFactory.getLogger(AIEndpoints.class);
 
     private final RouteScoutAgent routeScoutAgent;
 
-    public AIEndpoints() {
-        this.routeScoutAgent = new RouteScoutAgent();
+    public AIEndpoints(RouteScoutAgent routeScoutAgent) {
+        this.routeScoutAgent = routeScoutAgent;
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,24 +40,15 @@ public class AIEndpoints {
             return ResponseEntity.ok(jsonResponse);
 
         } catch (Exception e) {
-            System.err.println("Error in suggest endpoint: " + e.getMessage());
+            logger.error("Error in suggest endpoint: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"Failed to get suggestions: " + e.getMessage() + "\"}");
         }
     }
 
     // DTO class for request body
+    @Data
     public static class SuggestionRequest {
         private String message;
-
-        public SuggestionRequest() {}
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
     }
 }

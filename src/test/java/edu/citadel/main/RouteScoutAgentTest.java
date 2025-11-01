@@ -130,7 +130,7 @@ class RouteScoutAgentTest {
         String userMessage = "Find me a library";
 
         String expectedPromptSnippet = String.format(
-                "You are a helpful assistant for the RouteScout application.  You goal is to suggest \n" +
+                "You are a helpful assistant for the RouteScout application.  Your goal is to suggest \n" +
                         "locations based on user requests a travel route\n" +
                         "\n" +
                         "Based on the user's message: \"%s\", provide 2-3 location suggestions.\n",
@@ -149,7 +149,7 @@ class RouteScoutAgentTest {
     void testPromptFormat_RequestsJSON() {
         String userMessage = "test";
         String prompt = String.format(
-                "You are a helpful assistant for the RouteScout application.  You goal is to suggest \n" +
+                "You are a helpful assistant for the RouteScout application.  Your goal is to suggest \n" +
                         "locations based on user requests a travel route\n" +
                         "\n" +
                         "Based on the user's message: \"%s\", provide 2-3 location suggestions.\n" +

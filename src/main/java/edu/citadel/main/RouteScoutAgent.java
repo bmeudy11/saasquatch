@@ -2,8 +2,14 @@ package edu.citadel.main;
 
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RouteScoutAgent {
+    private static final Logger logger = LoggerFactory.getLogger(RouteScoutAgent.class);
+
     private Client genaiClient;
     private String modelName = "gemini-2.5-pro";
 
@@ -12,9 +18,13 @@ public class RouteScoutAgent {
     }
 
     public String getSuggestions(String message) throws Exception {
+        if (message == null || message.trim().isEmpty()) {
+            logger.warn("Received null or empty message for suggestion request");
+            throw new IllegalArgumentException("Message cannot be null or empty");
+        }
 
         String prompt = String.format(
-                "You are a helpful assistant for the RouteScout application.  You goal is to suggest \n" +
+                "You are a helpful assistant for the RouteScout application. Your goal is to suggest \n" +
                         "locations based on user requests a travel route\n" +
                         "\n" +
                         "Based on the user's message: \"%s\", provide 2-3 location suggestions.\n" +
@@ -35,18 +45,18 @@ public class RouteScoutAgent {
                 message
         );
 
-        System.out.println("Submitted message " + message + "\n");
+        logger.info("Processing suggestion request for message: {}", message);
         try {
             GenerateContentResponse response = genaiClient.models.generateContent(
                     modelName,
                     prompt,
                     null // Config is null, as JSON type is not supported in 1.0.0
             );
-            System.out.println("Generated response: " + response);
+            logger.debug("Generated response: {}", response);
             return response.text();
 
         } catch (Exception e) {
-            System.out.println("Error in RouteScoutAgent " + e);
+            logger.error("Error generating suggestions for message: {}", message, e);
             throw new Exception("Failed to get suggestions.", e);
         }
     }
