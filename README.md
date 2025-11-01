@@ -1,74 +1,230 @@
-# CSCI 602 REST API
+# RouteScout - Iteration 1
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+## Overview
 
-## Environment Setup (Students)
+RouteScout is a Spring Boot REST API application designed for route planning and user management. This document describes the features and functionality implemented in **Iteration 1**.
 
-1.) Install Java JDK 17+. JDK located [here](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html). If you have a Mac you can use `brew`.
+## Iteration 1 Features
 
-```bash
-brew install --cask corretto@17
+### User Account Management
+
+Iteration 1 establishes the foundation of the RouteScout application with a complete user account management system:
+
+- **Account Creation**: Users can create new accounts with username, email, and password
+- **Account Retrieval**: Accounts can be retrieved by ID or username
+- **Data Persistence**: All account data is stored in a PostgreSQL database
+- **Database Migrations**: Automated database schema management using Flyway
+
+## Technology Stack
+
+- **Java**: 17
+- **Spring Boot**: 3.3.2
+- **Database**: PostgreSQL
+- **Database Migration**: Flyway 10.17.1
+- **ORM**: Hibernate 6.5.2
+- **Build Tool**: Maven
+- **API Documentation**: Swagger/OpenAPI (SpringDoc 2.6.0)
+
+## Database Schema
+
+### Accounts Table
+
+The `accounts` table stores user account information:
+
+| Column      | Type         | Constraints           | Description                    |
+|-------------|--------------|------------------------|--------------------------------|
+| user_id     | SERIAL       | PRIMARY KEY           | Unique identifier              |
+| username    | VARCHAR(50)  | UNIQUE, NOT NULL      | Unique username                |
+| password    | VARCHAR(50)  | NOT NULL              | User password                  |
+| email       | VARCHAR(255) | UNIQUE, NOT NULL      | User email address             |
+| created_on  | TIMESTAMP    | NOT NULL, DEFAULT now()| Account creation timestamp    |
+| last_login  | TIMESTAMP    | NOT NULL, DEFAULT now()| Last login timestamp          |
+
+## API Endpoints
+
+### Account Management
+
+All account endpoints are prefixed with `/account`.
+
+> **Note**: In iteration 1, API responses include the password field. This is a known limitation that will be addressed in future iterations. See the Security Considerations section below.
+
+#### Create Account
+- **Method**: `POST`
+- **Path**: `/account`
+- **Content-Type**: `application/json`
+- **Request Body**:
+  ```json
+  {
+    "username": "johndoe",
+    "password": "securepassword",
+    "email": "john@example.com"
+  }
+  ```
+- **Response**: `201 CREATED`
+  ```json
+  {
+    "user_id": 1,
+    "username": "johndoe",
+    "password": "securepassword",
+    "email": "john@example.com",
+    "created_on": "2025-10-30T23:00:00.000+00:00",
+    "last_login": "2025-10-30T23:00:00.000+00:00"
+  }
+  ```
+
+#### Get Account by Username
+- **Method**: `GET`
+- **Path**: `/account/username/{username}`
+- **Response**: `200 OK` or `404 NOT FOUND`
+  ```json
+  {
+    "user_id": 1,
+    "username": "johndoe",
+    "password": "securepassword",
+    "email": "john@example.com",
+    "created_on": "2025-10-30T23:00:00.000+00:00",
+    "last_login": "2025-10-30T23:00:00.000+00:00"
+  }
+  ```
+
+#### Get Account by ID
+- **Method**: `GET`
+- **Path**: `/account/{id}`
+- **Response**: `200 OK` or `404 NOT FOUND`
+  ```json
+  {
+    "user_id": 1,
+    "username": "johndoe",
+    "password": "securepassword",
+    "email": "john@example.com",
+    "created_on": "2025-10-30T23:00:00.000+00:00",
+    "last_login": "2025-10-30T23:00:00.000+00:00"
+  }
+  ```
+
+### Health Check
+- **Method**: `GET`
+- **Path**: `/status`
+- **Response**: `200 OK` - Returns application status
+
+## Setup and Installation
+
+### Prerequisites
+
+1. **Java JDK 17 or higher**
+    - Download from [AWS Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html)
+    - Or install via Homebrew (Mac): `brew install --cask corretto@17`
+
+2. **PostgreSQL Database**
+    - Ensure you have a PostgreSQL instance running
+    - Update database credentials in `src/main/resources/application.yaml`
+
+### Configuration
+
+Update the database connection settings in `application.yaml`:
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://your-database-host:5432/your-database-name
+    username: your-username
+    password: your-password
 ```
 
-If you're on Windows, download the `.msi` installer from [here](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html) and run.
-
-2.) Create your personal repository from Github. You should receive a unique link from your professor from Github Classroom that will generate a private repository within your Github account.
-It should look something like this.
-
-```bash
-https://classroom.github.com/a/{classroomId}
-```
-
-3.) This will create your personal repository within the [Citadel CS Github Organization](https://github.com/CitadelCS).
-
-4.) Clone down the repository from Github
-
-```bash
-git clone git@git.github.com:CitadelCS/csci-602-fall-2021-{yourUsername}.git
-```
-
-5.) Build the project 
-
-> Disclaimer: If running on a Windows machine replace `./mvnw` with `.\mvnw`
+### Build the Project
 
 ```bash
 ./mvnw clean install
 ```
 
-You should see a success if everything is set up correctly.
+On Windows:
+```bash
+.\mvnw clean install
+```
 
-6.) Run the API
+### Run the Application
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Access the API by visiting [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html). From there you can hit the endpoints directly.
+The application will start on port **5001**.
 
-7.) Success!
+### Access the API
 
-## Setting Up DataSource
+- **Swagger UI**: [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html)
+- **API Base URL**: [http://localhost:5001](http://localhost:5001)
 
-Setting up the datasource within IntelliJ should be straightforward with username and password. If you're using a
-Heroku datasource then you will need to set the following settings on the Advanced tab
+## Project Structure
 
-![Datasource](./images/datasource_settings.png)
+```
+src/
+├── main/
+│   ├── java/edu/citadel/
+│   │   ├── api/                    # REST Controllers
+│   │   │   ├── AccountEndpoints.java
+│   │   │   ├── StatusEndpoints.java
+│   │   │   └── request/            # Request DTOs
+│   │   ├── config/                 # Application Configuration
+│   │   ├── dal/                    # Data Access Layer
+│   │   │   ├── AccountRepository.java
+│   │   │   └── model/              # JPA Entities
+│   │   │       └── Account.java
+│   │   └── main/                   # Application Entry Point
+│   │       └── RouteScoutApplication.java
+│   └── resources/
+│       ├── application.yaml        # Application Configuration
+│       └── db/migration/           # Flyway Database Migrations
+│           └── V1__create_accounts_table.sql
+└── test/
+    └── java/edu/citadel/main/
+        └── RouteScoutTests.java    # Unit Tests
+```
 
-## Resources
+## Testing
 
-### Spring Boot
+Run the test suite:
 
-For further references with Spring Boot:
+```bash
+./mvnw test
+```
 
-- [Spring Initializr](https://start.spring.io/)
-- [Getting Started](https://spring.io/guides/gs/spring-boot/)
+## Security Considerations
 
-### Maven
+**⚠️ Important Security Notes for Iteration 1:**
 
-For further references with Maven's dependency management framework:
+This iteration serves as a foundational implementation. The following security improvements are planned for future iterations:
 
-- [Spring and Maven](https://spring.io/guides/gs/spring-boot/)
-- [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-- [Apache Maven Getting Started](https://maven.apache.org/guides/getting-started/)
+1. **Password Storage**: Currently passwords are stored as plain text in VARCHAR(50) fields. Future iterations will implement:
+    - Secure password hashing (bcrypt or Argon2)
+    - Increased field length to accommodate hashed passwords (60+ characters)
 
+2. **Password in API Responses**: Currently the password field is returned in API responses. Future iterations will:
+    - Exclude password fields from all API responses
+    - Use DTOs (Data Transfer Objects) to control response fields
+
+3. **Authentication & Authorization**: Future iterations will implement:
+    - JWT-based authentication
+    - Role-based access control
+    - Session management
+
+**These security enhancements are intentionally deferred to keep iteration 1 focused on foundational functionality.**
+
+## What's Next?
+
+Future iterations will include:
+- Route planning features
+- Authentication and authorization (JWT-based)
+- Password encryption and secure hashing (bcrypt/Argon2)
+- Exclusion of sensitive data from API responses
+- Additional user management features (update, delete)
+- Route sharing and collaboration
+- Geographic data integration
+
+## Contributing
+
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE.md](LICENSE.md) for details.
