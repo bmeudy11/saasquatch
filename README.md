@@ -105,6 +105,137 @@ Once the application is running, you can access:
 
 You should now have RouteScout running locally!
 
+## API Endpoints
+
+### AIEndpoints - Location Suggestions
+
+RouteScout provides AI-powered location suggestions through the `/suggest` endpoint.
+
+#### GET /suggest
+
+**Description**: Health check endpoint to verify the service is available.
+
+**URL**: `http://localhost:5001/suggest`
+
+**Method**: `GET`
+
+**Response**:
+```json
+{
+  "status": "Service available"
+}
+```
+
+**Postman Setup**:
+1. Create a new GET request
+2. Enter URL: `http://localhost:5001/suggest`
+3. Click Send
+
+#### POST /suggest
+
+**Description**: Get AI-powered location suggestions based on natural language queries.
+
+**URL**: `http://localhost:5001/suggest`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "message": "Find me a quiet coffee shop to study"
+}
+```
+
+**Response** (Success - 200 OK):
+```json
+{
+  "suggestions": [
+    {
+      "name": "The Study Cafe",
+      "type": "Cafe",
+      "address": "123 Main Street, Charleston, SC",
+      "reason": "Quiet atmosphere with comfortable seating, free WiFi, and outlets at every table."
+    },
+    {
+      "name": "Bookworm Coffee House",
+      "type": "Cafe",
+      "address": "456 King Street, Charleston, SC",
+      "reason": "Library-inspired decor with private study nooks and a strict quiet policy after 2pm."
+    }
+  ]
+}
+```
+
+**Response** (Error - 400 Bad Request):
+```json
+{
+  "error": "Message is required."
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/suggest`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "message": "Find me a coffee shop on a route between Daniel Island, SC and James Island, SC"
+   }
+   ```
+6. Click Send
+
+**Example Queries**:
+- "Find me a coffee shop with WiFi"
+- "I need a quiet place to study"
+- "Suggest parks for a family picnic"
+- "Looking for restaurants with outdoor seating"
+
+## Running Tests
+
+### Running All Tests
+
+To run all tests in the project:
+
+```bash
+./mvnw test
+```
+
+> Note: On Windows, replace `./mvnw` with `.\mvnw`
+
+### Running RouteScoutAgent Tests
+
+To run only the RouteScoutAgent test suite:
+
+```bash
+./mvnw test -Dtest=RouteScoutAgentTest
+```
+
+This will execute all unit tests for the RouteScoutAgent class, including:
+- Constructor initialization tests
+- Input validation tests
+- Error handling tests
+- Prompt format validation tests
+
+### Running Specific Tests
+
+To run a specific test method:
+
+```bash
+./mvnw test -Dtest=RouteScoutAgentTest#testGetSuggestions_WithValidMessage
+```
+
+### Test Output
+
+After running tests, you can view:
+- **Console output**: Test results displayed in the terminal
+- **HTML Report**: Generated at `target/surefire-reports/index.html`
+- **XML Reports**: Available in `target/surefire-reports/` directory
+
 ## Setting Up DataSource
 
 Setting up the datasource within IntelliJ should be straightforward with username and password. If you're using a
