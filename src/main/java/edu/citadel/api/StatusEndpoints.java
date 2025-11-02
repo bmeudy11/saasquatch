@@ -30,8 +30,9 @@ public class StatusEndpoints {
 
     private final ObjectWriter objectWriter = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
-    @GetMapping(value = "health", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String health() throws JsonProcessingException {
+    //changed to "healthall" from "health"
+    @GetMapping(value = "healthall", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String healthall() throws JsonProcessingException {
         Map<String, String> healthStatus = new HashMap<>();
         healthStatus.put("status", "ok");
         return objectWriter.writeValueAsString(healthStatus);
