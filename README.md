@@ -1,52 +1,240 @@
-# CSCI 602 REST API
+# RouteScout
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-## Environment Setup (Students)
+RouteScout is a Spring Boot application that uses Google's Gemini AI to provide intelligent location suggestions based on natural language queries for travel routes.
 
-1.) Install Java JDK 17+. JDK located [here](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html). If you have a Mac you can use `brew`.
+## Prerequisites
 
+Before setting up RouteScout, ensure you have the following installed:
+
+### Required Software
+
+1. **Java JDK 17+**: RouteScout requires Java Development Kit 17 or higher
+    - **Mac**: Install using Homebrew
+      ```bash
+      brew install --cask corretto@17
+      ```
+    - **Windows**: Download the `.msi` installer from [AWS Corretto](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html) and run it
+    - **Verify installation**:
+      ```bash
+      java -version
+      ```
+
+2. **Maven**: Included via Maven Wrapper (`mvnw`), no separate installation needed
+
+3. **PostgreSQL Database**: Required for data persistence
+    - Install PostgreSQL 12 or higher
+    - Create a database for the application
+
+4. **Google API Key**: Required for Gemini AI integration
+    - Obtain an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+
+## Environment Variables
+
+RouteScout requires the following environment variables to be set:
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `GOOGLE_API_KEY` | Google Gemini API key for AI-powered location suggestions | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
+
+### Setting Environment Variables
+
+**Mac/Linux**:
 ```bash
-brew install --cask corretto@17
+export GOOGLE_API_KEY=your_api_key_here
 ```
 
-If you're on Windows, download the `.msi` installer from [here](https://docs.aws.amazon.com/corretto/latest/corretto-17-ug/downloads-list.html) and run.
-
-2.) Create your personal repository from Github. You should receive a unique link from your professor from Github Classroom that will generate a private repository within your Github account.
-It should look something like this.
-
-```bash
-https://classroom.github.com/a/{classroomId}
+**Windows (Command Prompt)**:
+```cmd
+set GOOGLE_API_KEY=your_api_key_here
 ```
 
-3.) This will create your personal repository within the [Citadel CS Github Organization](https://github.com/CitadelCS).
-
-4.) Clone down the repository from Github
-
-```bash
-git clone git@git.github.com:CitadelCS/csci-602-fall-2021-{yourUsername}.git
+**Windows (PowerShell)**:
+```powershell
+$env:GOOGLE_API_KEY="your_api_key_here"
 ```
 
-5.) Build the project 
+Alternatively, you can create an `application.properties` file in `src/main/resources/` with:
+```properties
+GOOGLE_API_KEY=your_api_key_here
+```
 
-> Disclaimer: If running on a Windows machine replace `./mvnw` with `.\mvnw`
+## Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone <repository-url>
+cd saasquatch
+```
+
+### 2. Set Up Environment Variables
+
+Set the required `GOOGLE_API_KEY` environment variable as described above.
+
+### 3. Build the Project
+
+> Note: On Windows, replace `./mvnw` with `.\mvnw`
 
 ```bash
 ./mvnw clean install
 ```
 
-You should see a success if everything is set up correctly.
+You should see a `BUILD SUCCESS` message if everything is set up correctly.
 
-6.) Run the API
+### 4. Run the Application
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-Access the API by visiting [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html). From there you can hit the endpoints directly.
+The application will start on port `5001`.
 
-7.) Success!
+### 5. Access the API
+
+Once the application is running, you can access:
+
+- **Swagger UI**: [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html)
+    - Interactive API documentation where you can test endpoints directly
+
+### 6. Success!
+
+You should now have RouteScout running locally!
+
+## API Endpoints
+
+### AIEndpoints - Location Suggestions
+
+RouteScout provides AI-powered location suggestions through the `/suggest` endpoint.
+
+#### GET /suggest
+
+**Description**: Health check endpoint to verify the service is available.
+
+**URL**: `http://localhost:5001/suggest`
+
+**Method**: `GET`
+
+**Response**:
+```json
+{
+  "status": "Service available"
+}
+```
+
+**Postman Setup**:
+1. Create a new GET request
+2. Enter URL: `http://localhost:5001/suggest`
+3. Click Send
+
+#### POST /suggest
+
+**Description**: Get AI-powered location suggestions based on natural language queries.
+
+**URL**: `http://localhost:5001/suggest`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "message": "Find me a quiet coffee shop to study"
+}
+```
+
+**Response** (Success - 200 OK):
+```json
+{
+  "suggestions": [
+    {
+      "name": "The Study Cafe",
+      "type": "Cafe",
+      "address": "123 Main Street, Charleston, SC",
+      "reason": "Quiet atmosphere with comfortable seating, free WiFi, and outlets at every table."
+    },
+    {
+      "name": "Bookworm Coffee House",
+      "type": "Cafe",
+      "address": "456 King Street, Charleston, SC",
+      "reason": "Library-inspired decor with private study nooks and a strict quiet policy after 2pm."
+    }
+  ]
+}
+```
+
+**Response** (Error - 400 Bad Request):
+```json
+{
+  "error": "Message is required."
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/suggest`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "message": "Find me a coffee shop on a route between Daniel Island, SC and James Island, SC"
+   }
+   ```
+6. Click Send
+
+**Example Queries**:
+- "Find me a coffee shop with WiFi"
+- "I need a quiet place to study"
+- "Suggest parks for a family picnic"
+- "Looking for restaurants with outdoor seating"
+
+## Running Tests
+
+### Running All Tests
+
+To run all tests in the project:
+
+```bash
+./mvnw test
+```
+
+> Note: On Windows, replace `./mvnw` with `.\mvnw`
+
+### Running RouteScoutAgent Tests
+
+To run only the RouteScoutAgent test suite:
+
+```bash
+./mvnw test -Dtest=RouteScoutAgentTest
+```
+
+This will execute all unit tests for the RouteScoutAgent class, including:
+- Constructor initialization tests
+- Input validation tests
+- Error handling tests
+- Prompt format validation tests
+
+### Running Specific Tests
+
+To run a specific test method:
+
+```bash
+./mvnw test -Dtest=RouteScoutAgentTest#testGetSuggestions_WithValidMessage
+```
+
+### Test Output
+
+After running tests, you can view:
+- **Console output**: Test results displayed in the terminal
+- **HTML Report**: Generated at `target/surefire-reports/index.html`
+- **XML Reports**: Available in `target/surefire-reports/` directory
 
 ## Setting Up DataSource
 
