@@ -32,3 +32,6 @@ springdoc:
   packagesToScan: edu.citadel.api
   pathsToMatch: /v1, /**
   show-actuator: true
+google:
+  maps:
+    key: ${GOOGLE_MAPS_KEY}
