@@ -1,6 +1,6 @@
 info:
   app:
-    description: Spring Boot API for RouteScout
+    description: RouteScout Spring Boot API
     name: routescout
     version: 1.0.0
 management:
@@ -14,15 +14,18 @@ management:
     web:
       exposure:
         include: openapi, swagger-ui
+google:
+  maps:
+    key: ${GOOGLE_MAPS_API_KEY:my_api_key}
 server:
   port: 5001
 spring:
   application:
     name: routescout
   datasource:
-    password: {password}
-    url: jdbc:postgresql://dbserver:dbport/{database}
-    username: {username}
+    password: my_pwd
+    url: jdbc:postgresql://my_db:my_port/my_user?sslmode=require
+    username: my_user
   flyway:
     enabled: false
   mvc:
