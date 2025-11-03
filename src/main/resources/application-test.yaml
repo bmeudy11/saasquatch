@@ -1,7 +1,7 @@
 info:
   app:
-    description: Template Spring Boot API for use of CSCI 602
-    name: csci-602
+    description: Spring Boot API for RouteScout
+    name: routescout
     version: 1.0.0
 management:
   endpoint:
@@ -18,10 +18,10 @@ server:
   port: 5001
 spring:
   application:
-    name: csci-602
+    name: routescout
   datasource:
     password: {password}
-    url: jdbc:postgresql://ccba8a0vn4fb2p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/{database}
+    url: jdbc:postgresql://dbserver:dbport/{database}
     username: {username}
   flyway:
     enabled: false
