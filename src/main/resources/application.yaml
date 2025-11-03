@@ -1,7 +1,7 @@
 info:
   app:
-    description: Template Spring Boot API for use of CSCI 602
-    name: csci-602
+    description: RouteScout Spring Boot API
+    name: routescout
     version: 1.0.0
 management:
   endpoint:
@@ -14,15 +14,18 @@ management:
     web:
       exposure:
         include: openapi, swagger-ui
+google:
+  maps:
+    key: ${GOOGLE_MAPS_API_KEY:my_api_key}
 server:
   port: 5001
 spring:
   application:
-    name: csci-602
+    name: routescout
   datasource:
-    password: {password}
-    url: jdbc:postgresql://ccba8a0vn4fb2p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/{database}
-    username: {username}
+    password: my_pwd
+    url: jdbc:postgresql://my_db:my_port/my_user?sslmode=require
+    username: my_user
   mvc:
     servlet:
       load-on-startup: 1
@@ -32,6 +35,3 @@ springdoc:
   packagesToScan: edu.citadel.api
   pathsToMatch: /v1, /**
   show-actuator: true
-google:
-  maps:
-    key: ${GOOGLE_MAPS_KEY}
