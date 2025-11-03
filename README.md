@@ -40,27 +40,37 @@ RouteScout requires the following environment variables to be set:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `GOOGLE_API_KEY` | Google Gemini API key for AI-powered location suggestions | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
+| `GOOGLE_MAPS_API_KEY` | Google Maps API key for route generation and directions | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
 
 ### Setting Environment Variables
 
 **Mac/Linux**:
 ```bash
 export GOOGLE_API_KEY=your_api_key_here
+export GOOGLE_MAPS_API_KEY=your_maps_api_key_here
 ```
 
 **Windows (Command Prompt)**:
 ```cmd
 set GOOGLE_API_KEY=your_api_key_here
+set GOOGLE_MAPS_API_KEY=your_maps_api_key_here
 ```
 
 **Windows (PowerShell)**:
 ```powershell
 $env:GOOGLE_API_KEY="your_api_key_here"
+$env:GOOGLE_MAPS_API_KEY="your_maps_api_key_here"
 ```
 
-Alternatively, you can create an `application.properties` file in `src/main/resources/` with:
-```properties
-GOOGLE_API_KEY=your_api_key_here
+Alternatively, you can set the `GOOGLE_MAPS_API_KEY` directly in the configuration files:
+- `src/main/resources/application.yaml` (for production/development)
+- `src/main/resources/application-test.yaml` (for testing)
+
+In either file, update line 19:
+```yaml
+google:
+  maps:
+    key: ${GOOGLE_MAPS_API_KEY:your_maps_api_key_here}
 ```
 
 ## Getting Started
@@ -194,6 +204,108 @@ RouteScout provides AI-powered location suggestions through the `/suggest` endpo
 - "I need a quiet place to study"
 - "Suggest parks for a family picnic"
 - "Looking for restaurants with outdoor seating"
+
+### RouteEndpoints - Route Generation
+
+RouteScout provides route generation and turn-by-turn directions using Google Maps API.
+
+#### POST /route/generateRoute
+
+**Description**: Generate a driving route with step-by-step directions between two locations.
+
+**URL**: `http://localhost:5001/route/generateRoute`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "origin": "Charleston, SC",
+  "destination": "Columbia, SC"
+}
+```
+
+**Response** (Success - 200 OK):
+```json
+{
+  "origin": "Charleston, SC",
+  "destination": "Columbia, SC",
+  "distance": "114 mi",
+  "duration": "1 hour 53 mins",
+  "instructions": [
+    "Head northwest on Meeting St toward Cumberland St.",
+    "Turn right onto Spring St.",
+    "Turn left onto US-52 N/Morrison Dr.",
+    "..."
+  ]
+}
+```
+
+**Response** (Error - 500 Internal Server Error):
+```json
+"Error message describing what went wrong"
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/route/generateRoute`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "origin": "Daniel Island, SC",
+     "destination": "James Island, SC"
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/route/generateRoute \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin": "Charleston, SC",
+    "destination": "Columbia, SC"
+  }'
+```
+
+**Requirements**:
+- The `GOOGLE_MAPS_API_KEY` must be set in `application.yaml` or `application-test.yaml`
+- Both `origin` and `destination` should be valid location strings (addresses, cities, or landmarks)
+- The endpoint uses Google Maps Directions API for driving routes
+
+### Health Check Endpoint
+
+#### GET /actuator/health
+
+**Description**: Spring Boot Actuator health check endpoint to verify the application is running.
+
+**URL**: `http://localhost:5001/actuator/health`
+
+**Method**: `GET`
+
+**Response** (Success - 200 OK):
+```json
+{
+  "status": "UP"
+}
+```
+
+**Postman Setup**:
+1. Create a new GET request
+2. Enter URL: `http://localhost:5001/actuator/health`
+3. Click Send
+
+**cURL Example**:
+```bash
+curl http://localhost:5001/actuator/health
+```
+
+**Note**: The health endpoint is enabled in `application.yaml` under the `management.endpoint.health.enabled` configuration.
 
 ## Running Tests
 
