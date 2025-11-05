@@ -1,23 +1,26 @@
 package edu.citadel.main;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
+import edu.citadel.api.response.AISuggestionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class RouteScoutAgent {
     private static final Logger logger = LoggerFactory.getLogger(RouteScoutAgent.class);
 
-    private Client genaiClient;
-    private String modelName = "gemini-2.5-pro";
+    private final Client genaiClient;
 
     public RouteScoutAgent() {
         this.genaiClient = new Client();
     }
 
-    public String getSuggestions(String message) throws Exception {
+    public AISuggestionResponse getSuggestions(String message) throws Exception {
         if (message == null || message.trim().isEmpty()) {
             logger.warn("Received null or empty message for suggestion request");
             throw new IllegalArgumentException("Message cannot be null or empty");
@@ -47,13 +50,19 @@ public class RouteScoutAgent {
 
         logger.info("Processing suggestion request for message: {}", message);
         try {
+            String modelName = "gemini-2.5-pro";
             GenerateContentResponse response = genaiClient.models.generateContent(
                     modelName,
                     prompt,
                     null // Config is null, as JSON type is not supported in 1.0.0
             );
             logger.debug("Generated response: {}", response);
-            return response.text();
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(
+                    Objects.requireNonNull(response.text())
+                            .replaceAll("`", "")
+                            .replaceAll("json", ""),
+                    AISuggestionResponse.class);
 
         } catch (Exception e) {
             logger.error("Error generating suggestions for message: {}", message, e);

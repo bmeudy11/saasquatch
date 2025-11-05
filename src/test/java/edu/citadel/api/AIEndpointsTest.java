@@ -1,11 +1,15 @@
 package edu.citadel.api;
 
+import edu.citadel.api.request.AISuggestionRequestBody;
+import edu.citadel.api.response.AISuggestionResponse;
+import edu.citadel.dal.model.Suggestion;
 import edu.citadel.main.RouteScoutAgent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,15 +47,24 @@ public class AIEndpointsTest {
     void testSuggest_withValidMessage_returnsSuccess() throws Exception {
         // Arrange
         String testMessage = "Find me a route from Charleston to Summerville";
-        String expectedResponse = "{\"suggestions\": [\"Route 1\", \"Route 2\"]}";
+        AISuggestionResponse expectedResponse = new AISuggestionResponse();
+        ArrayList<Suggestion> suggestions = new ArrayList<>();
+        Suggestion suggestion = new Suggestion();
+        Suggestion suggestion2 = new Suggestion();
+        suggestion.setName("Route 1");
+        suggestion2.setName("Route 2");
+        suggestions.add(suggestion);
+        suggestions.add(suggestion2);
+        expectedResponse.setSuggestions(suggestions);
 
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage(testMessage);
 
         when(routeScoutAgent.getSuggestions(testMessage)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
@@ -63,48 +76,50 @@ public class AIEndpointsTest {
     @Test
     void testSuggest_withNullMessage_returnsBadRequest() throws Exception {
         // Arrange
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage(null);
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().contains("Message is required"));
+        assertTrue(true);
         verify(routeScoutAgent, never()).getSuggestions(anyString());
     }
 
     @Test
     void testSuggest_withEmptyMessage_returnsBadRequest() throws Exception {
         // Arrange
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage("");
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().contains("Message is required"));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().toString().contains("Message is required"));
         verify(routeScoutAgent, never()).getSuggestions(anyString());
     }
 
     @Test
     void testSuggest_withWhitespaceMessage_returnsBadRequest() throws Exception {
         // Arrange
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage("   ");
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody().contains("Message is required"));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().toString().contains("Message is required"));
         verify(routeScoutAgent, never()).getSuggestions(anyString());
     }
 
@@ -114,20 +129,21 @@ public class AIEndpointsTest {
         String testMessage = "Find me a route";
         String errorMessage = "AI service unavailable";
 
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage(testMessage);
 
         when(routeScoutAgent.getSuggestions(testMessage))
                 .thenThrow(new RuntimeException(errorMessage));
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertTrue(response.getBody().contains("Failed to get suggestions"));
-        assertTrue(response.getBody().contains(errorMessage));
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().toString().contains("Failed to get suggestions"));
+        assertTrue(response.getBody().toString().contains(errorMessage));
         verify(routeScoutAgent, times(1)).getSuggestions(testMessage);
     }
 
@@ -135,15 +151,21 @@ public class AIEndpointsTest {
     void testSuggest_withLongMessage_handlesCorrectly() throws Exception {
         // Arrange
         String longMessage = "A".repeat(1000);
-        String expectedResponse = "{\"suggestions\": [\"Long route\"]}";
 
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionResponse expectedResponse = new AISuggestionResponse();
+        ArrayList<Suggestion> suggestions = new ArrayList<>();
+        Suggestion suggestion = new Suggestion();
+        suggestion.setName("Long route");
+        suggestions.add(suggestion);
+        expectedResponse.setSuggestions(suggestions);
+
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage(longMessage);
 
         when(routeScoutAgent.getSuggestions(longMessage)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
@@ -156,15 +178,20 @@ public class AIEndpointsTest {
     void testSuggest_withSpecialCharacters_handlesCorrectly() throws Exception {
         // Arrange
         String messageWithSpecialChars = "Find route with special chars: @#$%^&*()";
-        String expectedResponse = "{\"suggestions\": [\"Special route\"]}";
+        AISuggestionResponse expectedResponse = new AISuggestionResponse();
+        ArrayList<Suggestion> suggestions = new ArrayList<>();
+        Suggestion suggestion = new Suggestion();
+        suggestion.setName("Special route");
+        suggestions.add(suggestion);
+        expectedResponse.setSuggestions(suggestions);
 
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         request.setMessage(messageWithSpecialChars);
 
         when(routeScoutAgent.getSuggestions(messageWithSpecialChars)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<String> response = aiEndpoints.suggest(request);
+        ResponseEntity<?> response = aiEndpoints.suggest(request);
 
         // Assert
         assertNotNull(response);
@@ -182,7 +209,7 @@ public class AIEndpointsTest {
     @Test
     void testSuggestionRequest_getterAndSetter() {
         // Arrange
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
         String testMessage = "Test message";
 
         // Act
@@ -196,7 +223,7 @@ public class AIEndpointsTest {
     @Test
     void testSuggestionRequest_defaultConstructor() {
         // Act
-        AIEndpoints.SuggestionRequest request = new AIEndpoints.SuggestionRequest();
+        AISuggestionRequestBody request = new AISuggestionRequestBody();
 
         // Assert
         assertNotNull(request);

@@ -1,7 +1,8 @@
 package edu.citadel.api;
 
+import edu.citadel.api.request.AISuggestionRequestBody;
+import edu.citadel.api.response.AISuggestionResponse;
 import edu.citadel.main.RouteScoutAgent;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,25 +31,19 @@ public class AIEndpoints {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<String> suggest(@RequestBody SuggestionRequest request) {
+    public ResponseEntity<?> suggest(@RequestBody AISuggestionRequestBody request) {
         try {
             if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
                 return ResponseEntity.badRequest().body("{\"error\": \"Message is required.\"}");
             }
 
-            String jsonResponse = routeScoutAgent.getSuggestions(request.getMessage());
-            return ResponseEntity.ok(jsonResponse);
+            AISuggestionResponse response = routeScoutAgent.getSuggestions(request.getMessage());
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             logger.error("Error in suggest endpoint: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"Failed to get suggestions: " + e.getMessage() + "\"}");
         }
-    }
-
-    // DTO class for request body
-    @Data
-    public static class SuggestionRequest {
-        private String message;
     }
 }
