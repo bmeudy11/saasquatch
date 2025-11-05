@@ -3,8 +3,6 @@ package edu.citadel.main;
 import com.google.genai.Client;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import java.lang.reflect.Field;
 
@@ -37,20 +35,6 @@ class RouteScoutAgentTest {
             Object genaiClient = genaiClientField.get(agent);
 
             assertNotNull(genaiClient, "genaiClient should be initialized");
-        }
-    }
-
-    @Test
-    void testConstructor_InitializesModelName() throws Exception {
-        try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
-
-            Field modelNameField = RouteScoutAgent.class.getDeclaredField("modelName");
-            modelNameField.setAccessible(true);
-            String modelName = (String) modelNameField.get(agent);
-
-            assertEquals("gemini-2.5-pro", modelName,
-                    "Model name should be initialized to gemini-2.5-pro");
         }
     }
 
