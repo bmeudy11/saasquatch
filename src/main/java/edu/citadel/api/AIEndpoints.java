@@ -1,7 +1,9 @@
 package edu.citadel.api;
 
 import edu.citadel.api.request.AISuggestionRequestBody;
+import edu.citadel.api.request.AIPOIsRequestBody;
 import edu.citadel.api.response.AISuggestionResponse;
+import edu.citadel.api.response.AIPOIsResponse;
 import edu.citadel.main.RouteScoutAgent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,4 +48,24 @@ public class AIEndpoints {
                     .body("{\"error\": \"Failed to get suggestions: " + e.getMessage() + "\"}");
         }
     }
+
+    @PostMapping(value = "/POIs", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> getPOIs(@RequestBody AIPOIsRequestBody request) {
+        try {
+            if ((request.getOrigin() == null || request.getOrigin().trim().isEmpty()) ||
+                    (request.getDestination() == null || request.getDestination().trim().isEmpty())) {
+                return ResponseEntity.badRequest().body("{\"error\": \"Origin and Destination is required.\"}");
+            }
+
+            var response = new java.util.HashMap<String, Object>();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error in suggest/POIs endpoint: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("{\"error\": \"Failed to get points of interest: " + e.getMessage() + "\"}");
+    }
+    }
+
+
 }
