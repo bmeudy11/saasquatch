@@ -81,11 +81,24 @@ public class RouteEndpoints {
     @PostMapping("/generateRoute")
     public ResponseEntity<?> generateRoute(@RequestBody RouteRequestBody body) {
         try {
+
+            // Convert the input list into a String of waypoints separated by the "|" character
+            String waypoints =  "";
+            if (body.getWaypoints() != null) {
+                for (int i = 0; i < body.getWaypoints().size(); i++) {
+                    waypoints += makeHumanReadable(body.getWaypoints().get(i));
+                    if (i < body.getWaypoints().size() - 1) {
+                        waypoints += "|";
+                    }
+                }
+            }
+
             // Call the Google Maps Directions API for car travel and origin/destination
             DirectionsResult result = DirectionsApi.newRequest(context)
                     .mode(TravelMode.DRIVING)
                     .origin(body.getOrigin())
                     .destination(body.getDestination())
+                    .waypoints(waypoints)
                     .await();
 
             // Add step-by-step driving instructions to instructions
@@ -103,6 +116,7 @@ public class RouteEndpoints {
             response.setDestination(body.getDestination());
             response.setDistance(result.routes[0].legs[0].distance.humanReadable);
             response.setDuration(result.routes[0].legs[0].duration.humanReadable);
+            response.setWaypoints(body.getWaypoints());
             response.setInstructions(instructions);
 
             return ResponseEntity.ok(response);

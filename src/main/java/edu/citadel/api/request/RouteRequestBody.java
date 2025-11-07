@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,4 +15,7 @@ public class RouteRequestBody {
     private String origin;
 
     private String destination;
+
+    // Optional parameter for waypoints
+    private List<String> waypoints;
 }
