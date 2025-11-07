@@ -1,6 +1,6 @@
 package edu.citadel.api.response;
 
-import edu.citadel.dal.model.Suggestion;
+import edu.citadel.dal.model.Poi;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +13,5 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AIPOIsResponse {
-    private ArrayList<Suggestion> suggestions;
+    private ArrayList<Poi> pois;
 }

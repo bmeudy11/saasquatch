@@ -58,7 +58,7 @@ public class AIEndpoints {
                 return ResponseEntity.badRequest().body("{\"error\": \"Origin and Destination is required.\"}");
             }
 
-            var response = new java.util.HashMap<String, Object>();
+            AIPOIsResponse response = routeScoutAgent.getAIPOIs(request.getOrigin(), request.getDestination());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error in suggest/POIs endpoint: {}", e.getMessage(), e);
