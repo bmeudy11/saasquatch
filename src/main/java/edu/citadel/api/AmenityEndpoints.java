@@ -8,7 +8,11 @@ import com.google.maps.model.LatLng;
 import com.google.maps.model.PlaceType;
 import com.google.maps.model.PlacesSearchResponse;
 import com.google.maps.model.PlacesSearchResult;
+import edu.citadel.api.request.AmenityRequest;
+import edu.citadel.api.request.MultiTypeRequest;
 import edu.citadel.dal.keys.APIKeys;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -151,50 +155,9 @@ public class AmenityEndpoints {
     }
 }
 
-// Request DTOs
-class AmenityRequest {
-    private double latitude;
-    private double longitude;
-    private int radius;
-    private String type;
-    private String keyword;
-
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
-
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
-
-    public int getRadius() { return radius; }
-    public void setRadius(int radius) { this.radius = radius; }
-
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
-
-    public String getKeyword() { return keyword; }
-    public void setKeyword(String keyword) { this.keyword = keyword; }
-}
-
-class MultiTypeRequest {
-    private double latitude;
-    private double longitude;
-    private int radius;
-    private List<String> types;
-
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
-
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
-
-    public int getRadius() { return radius; }
-    public void setRadius(int radius) { this.radius = radius; }
-
-    public List<String> getTypes() { return types; }
-    public void setTypes(List<String> types) { this.types = types; }
-}
-
 // Response DTOs
+@Getter
+@Setter
 class AmenityDTO {
     private String placeId;
     private String name;
@@ -207,37 +170,10 @@ class AmenityDTO {
     private boolean openNow;
     private int priceLevel;
 
-    public String getPlaceId() { return placeId; }
-    public void setPlaceId(String placeId) { this.placeId = placeId; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public String getVicinity() { return vicinity; }
-    public void setVicinity(String vicinity) { this.vicinity = vicinity; }
-
-    public float getRating() { return rating; }
-    public void setRating(float rating) { this.rating = rating; }
-
-    public int getUserRatingsTotal() { return userRatingsTotal; }
-    public void setUserRatingsTotal(int userRatingsTotal) { this.userRatingsTotal = userRatingsTotal; }
-
-    public double getLatitude() { return latitude; }
-    public void setLatitude(double latitude) { this.latitude = latitude; }
-
-    public double getLongitude() { return longitude; }
-    public void setLongitude(double longitude) { this.longitude = longitude; }
-
-    public String[] getTypes() { return types; }
-    public void setTypes(String[] types) { this.types = types; }
-
-    public boolean isOpenNow() { return openNow; }
-    public void setOpenNow(boolean openNow) { this.openNow = openNow; }
-
-    public int getPriceLevel() { return priceLevel; }
-    public void setPriceLevel(int priceLevel) { this.priceLevel = priceLevel; }
 }
 
+@Getter
+@Setter
 class AmenityResponse {
     private List<AmenityDTO> amenities;
     private String nextPageToken;
@@ -247,13 +183,10 @@ class AmenityResponse {
         this.nextPageToken = nextPageToken;
     }
 
-    public List<AmenityDTO> getAmenities() { return amenities; }
-    public void setAmenities(List<AmenityDTO> amenities) { this.amenities = amenities; }
-
-    public String getNextPageToken() { return nextPageToken; }
-    public void setNextPageToken(String nextPageToken) { this.nextPageToken = nextPageToken; }
 }
 
+@Getter
+@Setter
 class ErrorResponse {
     private String error;
 
@@ -261,6 +194,4 @@ class ErrorResponse {
         this.error = error;
     }
 
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
 }
