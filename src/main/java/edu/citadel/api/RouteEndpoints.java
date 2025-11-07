@@ -82,7 +82,7 @@ public class RouteEndpoints {
     public ResponseEntity<?> generateRoute(@RequestBody RouteRequestBody body) {
         try {
 
-            // Convert the input list into a String of waypoints separated by the "|" character
+            // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
             String waypoints =  "";
             if (body.getWaypoints() != null) {
                 for (int i = 0; i < body.getWaypoints().size(); i++) {
@@ -114,8 +114,33 @@ public class RouteEndpoints {
             RouteResponse response = new RouteResponse();
             response.setOrigin(body.getOrigin());
             response.setDestination(body.getDestination());
-            response.setDistance(result.routes[0].legs[0].distance.humanReadable);
-            response.setDuration(result.routes[0].legs[0].duration.humanReadable);
+
+            // Calculate and save the total distance in miles
+            double distanceInMeters = 0;
+            for (int i = 0; i < result.routes[0].legs.length; i++) {
+                distanceInMeters += result.routes[0].legs[i].distance.inMeters;
+            }
+
+            double distanceInMiles = distanceInMeters * 0.000621371;
+            distanceInMiles = Math.round(distanceInMiles * 100.00) / 100.00;
+
+            String distanceString = String.valueOf(distanceInMiles) + " mi";
+            response.setDistance(distanceString);
+
+            long totalSeconds = 0;
+            for (int i = 0; i < result.routes[0].legs.length; i++) {
+                totalSeconds += result.routes[0].legs[i].duration.inSeconds;
+            }
+
+            int seconds = (int) totalSeconds % 60;
+
+            long totalMinutes = totalSeconds / 60;
+            int minutes = (int) totalMinutes % 60;
+
+            long totalHours = totalMinutes / 60;
+            int hours = (int) totalHours;
+
+            response.setDuration(hours + " hours " +  minutes + " minutes " + seconds + " seconds");
             response.setWaypoints(body.getWaypoints());
             response.setInstructions(instructions);
 
