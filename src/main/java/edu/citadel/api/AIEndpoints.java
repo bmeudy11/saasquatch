@@ -4,7 +4,6 @@ import edu.citadel.api.request.AISuggestionRequestBody;
 import edu.citadel.api.request.AIPOIsRequestBody;
 import edu.citadel.api.response.AISuggestionResponse;
 import edu.citadel.api.response.AIPOIsResponse;
-import edu.citadel.dal.model.Poi;
 import edu.citadel.dal.model.Suggestion;
 import edu.citadel.main.RouteScoutAgent;
 import edu.citadel.services.POISearchService;

@@ -43,11 +43,8 @@ public class RouteScoutAgent {
             );
             logger.debug("getSuggestions generated response: {}", response);
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(
-                    Objects.requireNonNull(response.text())
-                            .replaceAll("`", "")
-                            .replaceAll("json", ""),
-                    AISuggestionResponse.class);
+            String cleanedResponse = Objects.requireNonNull(response.text()).replaceAll("`", "").replaceAll("json", "");
+            return mapper.readValue(cleanedResponse, AISuggestionResponse.class);
 
         } catch (Exception e) {
             logger.error("Error generating suggestions for message: {}", message, e);
@@ -72,11 +69,8 @@ public class RouteScoutAgent {
             );
             logger.debug("getAIPOIs generated response: {}", response);
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(
-                    Objects.requireNonNull(response.text())
-                            .replaceAll("`", "")
-                            .replaceAll("json", ""),
-                    AIPOIsResponse.class);
+            String cleanedResponse = Objects.requireNonNull(response.text()).replaceAll("`", "").replaceAll("json", "");
+            return mapper.readValue(cleanedResponse, AIPOIsResponse.class);
 
         } catch (Exception e) {
             logger.error("Error generating POIs for route from {} to {}", origin, destination, e);
@@ -109,9 +103,7 @@ public class RouteScoutAgent {
             );
             logger.debug("parsePOIQuery generated response: {}", response);
 
-            String responseText = Objects.requireNonNull(response.text())
-                    .replaceAll("`", "")
-                    .replaceAll("json", "");
+            String responseText = Objects.requireNonNull(response.text()).replaceAll("`", "").replaceAll("json", "");
 
             ObjectMapper mapper = new ObjectMapper();
             JsonNode rootNode = mapper.readTree(responseText);
