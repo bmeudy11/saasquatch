@@ -4,10 +4,7 @@ import com.google.maps.GeoApiContext;
 import com.google.maps.NearbySearchRequest;
 import com.google.maps.PlacesApi;
 import com.google.maps.errors.ApiException;
-import com.google.maps.model.LatLng;
-import com.google.maps.model.PlaceType;
-import com.google.maps.model.PlacesSearchResponse;
-import com.google.maps.model.PlacesSearchResult;
+import com.google.maps.model.*;
 import edu.citadel.api.request.AmenityRequest;
 import edu.citadel.api.request.MultiTypeRequest;
 import edu.citadel.dal.keys.APIKeys;
@@ -17,7 +14,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// ...
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,6 +137,8 @@ public class AmenityEndpoints {
                 dto.setVicinity(result.vicinity);
                 dto.setRating(result.rating);
                 dto.setUserRatingsTotal(result.userRatingsTotal);
+                dto.setOpenNow(result.openingHours != null && result.openingHours.openNow);
+                //dto.setHasRestroom(result.restroom); //should work is using the newest NearbySearch
 
                 if (result.geometry != null && result.geometry.location != null) {
                     dto.setLatitude(result.geometry.location.lat);
@@ -144,9 +149,59 @@ public class AmenityEndpoints {
                     dto.setTypes(result.types);
                 }
 
-                dto.setOpenNow(result.openingHours != null && result.openingHours.openNow);
-                //dto.setPriceLevel(result.priceLevel != null ? result.priceLevel.ordinal() : -1);
+                //Restroom and Restaurant Information
+                try {
+                    PlaceDetails details = PlacesApi.placeDetails(context, result.placeId).await();
 
+                    dto.setWebsite(details.website.toString());
+                    dto.setPhoneNumber(details.formattedPhoneNumber);
+                    dto.setWheelchairAccessibleEntrance(details.wheelchairAccessibleEntrance);
+                    dto.setPriceLevel(details.priceLevel != null ? details.priceLevel.ordinal() : -1);
+
+                    boolean hasRestroom = false;
+                    boolean isRestaurant = false;
+                    boolean music = false;
+                    if (details.reviews != null) {
+                        for (PlaceDetails.Review review : details.reviews) {
+                            String text = review.text != null ? review.text.toLowerCase() : "";
+                            if (text.toLowerCase().contains("restroom") ||
+                                    text.toLowerCase().contains("toilet") ||
+                                    text.toLowerCase().contains("washroom") ||
+                                    text.toLowerCase().contains("bathroom")) {
+                                hasRestroom = true;
+                                break;
+                            }
+                            if (result.types != null) {
+                                for (String type : result.types) {
+                                    if (type.equalsIgnoreCase("food") || type.equalsIgnoreCase("restaurant") || type.equalsIgnoreCase("cafe") || type.equalsIgnoreCase("bar")) {
+                                        isRestaurant = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isRestaurant) {
+                                dto.setVegetarianFood(details.servesVegetarianFood);
+                                dto.setDelivery(details.delivery);
+                                dto.setTakeout(details.takeout);
+                                dto.setDineIn(details.dineIn);
+                                dto.setServesBreakfast(details.servesBreakfast);
+                                dto.setServesLunch(details.servesLunch);
+                                dto.setServesDinner(details.servesDinner);
+                                dto.setReservable(details.reservable);
+                            }
+                            if (text.toLowerCase().contains("music")) {
+                                music = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    dto.setMusic(music);
+                    dto.setHasRestroom(hasRestroom);
+
+                } catch (Exception e) {
+                    dto.setHasRestroom(false);
+                }
                 amenities.add(dto);
             }
         }
@@ -167,9 +222,21 @@ class AmenityDTO {
     private double latitude;
     private double longitude;
     private String[] types;
+    private String website;
+    private String phoneNumber;
     private boolean openNow;
+    private boolean wheelchairAccessibleEntrance;
     private int priceLevel;
-
+    private boolean hasRestroom;
+    private boolean dineIn;
+    private boolean takeout;
+    private boolean delivery;
+    private boolean servesBreakfast;
+    private boolean servesLunch;
+    private boolean servesDinner;
+    private boolean vegetarianFood;
+    private boolean music;
+    private boolean reservable;
 }
 
 @Getter
