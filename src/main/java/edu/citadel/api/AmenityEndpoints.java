@@ -1,10 +1,7 @@
 package edu.citadel.api;
 
-import com.google.maps.GeoApiContext;
-import com.google.maps.NearbySearchRequest;
-import com.google.maps.PlacesApi;
-import com.google.maps.errors.ApiException;
-import com.google.maps.model.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.citadel.api.request.AmenityRequest;
 import edu.citadel.api.request.MultiTypeRequest;
 import edu.citadel.dal.keys.APIKeys;
@@ -14,25 +11,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// ...
-
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/nearest")
 public class AmenityEndpoints {
-    private final GeoApiContext context;
+    private final String apiKey;
+    private final ObjectMapper objectMapper;
+    private static final String PLACES_API_URL = "https://places.googleapis.com/v1/places:searchNearby";
+    private static final String FIELD_MASK =
+            "places.id,places.displayName,places.formattedAddress,places.location," +
+                    "places.rating,places.userRatingCount,places.types,places.websiteUri," +
+                    "places.nationalPhoneNumber,places.currentOpeningHours,places.priceLevel," +
+                    "places.accessibilityOptions,places.restroom," +
+                    "places.servesVegetarianFood,places.delivery,places.takeout,places.dineIn," +
+                    "places.servesBreakfast,places.servesLunch,places.servesDinner,places.reservable";
 
     public AmenityEndpoints(APIKeys apiKeys) {
-        this.context = new GeoApiContext.Builder()
-                .apiKey(apiKeys.getMapsApiKey())
-                .build();
+        this.apiKey = apiKeys.getMapsApiKey();
+        this.objectMapper = new ObjectMapper();
     }
 
     /**
@@ -49,36 +55,20 @@ public class AmenityEndpoints {
     @PostMapping("/amenity")
     public ResponseEntity<?> nearestAmenity(@RequestBody AmenityRequest request) {
         try {
-            LatLng location = new LatLng(request.getLatitude(), request.getLongitude());
+            Map<String, Object> requestBody = buildSearchRequest(
+                    request.getLatitude(),
+                    request.getLongitude(),
+                    request.getRadius(),
+                    request.getType() != null && !request.getType().isEmpty() ?
+                            List.of(request.getType().toLowerCase()) : null
+            );
 
-            // Create nearby search request
-            NearbySearchRequest searchRequest = PlacesApi.nearbySearchQuery(context, location);
+            JsonNode response = makeSearchNearbyRequest(requestBody);
+            List<AmenityDTO> amenities = convertJsonToAmenityList(response);
 
-            // Set radius (in meters)
-            searchRequest.radius(request.getRadius() != 0 ? request.getRadius() : 1000);
+            return ResponseEntity.ok(new AmenityResponse(amenities, null));
 
-            // Set place type if provided
-            if (request.getType() != null && !request.getType().isEmpty()) {
-                PlaceType placeType = getPlaceType(request.getType());
-                if (placeType != null) {
-                    searchRequest.type(placeType);
-                }
-            }
-
-            // Set keyword if provided
-            if (request.getKeyword() != null && !request.getKeyword().isEmpty()) {
-                searchRequest.keyword(request.getKeyword());
-            }
-
-            // Execute the search
-            PlacesSearchResponse response = searchRequest.await();
-
-            // Convert to DTOs
-            List<AmenityDTO> amenities = convertToAmenityList(response.results);
-
-            return ResponseEntity.ok(new AmenityResponse(amenities, response.nextPageToken));
-
-        } catch (ApiException | InterruptedException | IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("Error fetching amenities: " + e.getMessage()));
         }
@@ -91,126 +81,240 @@ public class AmenityEndpoints {
     @PostMapping("/amenity/types")
     public ResponseEntity<?> amenitiesByTypes(@RequestBody MultiTypeRequest request) {
         try {
-            LatLng location = new LatLng(request.getLatitude(), request.getLongitude());
             List<AmenityDTO> allAmenities = new ArrayList<>();
 
-            // Search for each type
             for (String typeStr : request.getTypes()) {
-                PlaceType placeType = getPlaceType(typeStr);
-                if (placeType != null) {
-                    NearbySearchRequest searchRequest = PlacesApi.nearbySearchQuery(context, location)
-                            .radius(request.getRadius() != 0 ? request.getRadius() : 1000)
-                            .type(placeType);
+                Map<String, Object> requestBody = buildSearchRequest(
+                        request.getLatitude(),
+                        request.getLongitude(),
+                        request.getRadius(),
+                        List.of(typeStr.toLowerCase())
+                );
 
-                    PlacesSearchResponse response = searchRequest.await();
-                    allAmenities.addAll(convertToAmenityList(response.results));
-                }
+                JsonNode response = makeSearchNearbyRequest(requestBody);
+                allAmenities.addAll(convertJsonToAmenityList(response));
             }
 
             return ResponseEntity.ok(new AmenityResponse(allAmenities, null));
 
-        } catch (ApiException | InterruptedException | IOException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ErrorResponse("Error fetching amenities by types: " + e.getMessage()));
         }
     }
 
-    // Helper method to convert string to PlaceType enum
-    private PlaceType getPlaceType(String type) {
-        try {
-            return PlaceType.valueOf(type.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            // Return null if invalid type
-            return null;
+    private Map<String, Object> buildSearchRequest(double latitude, double longitude, int radius, List<String> types) {
+        Map<String, Object> requestBody = new HashMap<>();
+
+        Map<String, Object> locationRestriction = new HashMap<>();
+        Map<String, Object> circle = new HashMap<>();
+        Map<String, Double> center = new HashMap<>();
+        center.put("latitude", latitude);
+        center.put("longitude", longitude);
+        circle.put("center", center);
+        circle.put("radius", radius != 0 ? (double) radius : 1000.0);
+        locationRestriction.put("circle", circle);
+        requestBody.put("locationRestriction", locationRestriction);
+
+        if (types != null && !types.isEmpty()) {
+            requestBody.put("includedTypes", types);
+        }
+
+        requestBody.put("maxResultCount", 20);
+
+        return requestBody;
+    }
+
+    private JsonNode makeSearchNearbyRequest(Map<String, Object> requestBody) throws Exception {
+        URL url = new URL(PLACES_API_URL);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("X-Goog-Api-Key", apiKey);
+        conn.setRequestProperty("X-Goog-FieldMask", FIELD_MASK);
+        conn.setDoOutput(true);
+
+        String jsonInputString = objectMapper.writeValueAsString(requestBody);
+        try (OutputStream os = conn.getOutputStream()) {
+            byte[] input = jsonInputString.getBytes(StandardCharsets.UTF_8);
+            os.write(input, 0, input.length);
+        }
+
+        return readResponse(conn);
+    }
+
+    private JsonNode readResponse(HttpURLConnection conn) throws Exception {
+        int responseCode = conn.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+                StringBuilder response = new StringBuilder();
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                return objectMapper.readTree(response.toString());
+            }
+        } else {
+            throw new Exception("API request failed with response code: " + responseCode);
         }
     }
 
-    // Helper method to convert results to DTOs
-    private List<AmenityDTO> convertToAmenityList(PlacesSearchResult[] results) {
+    private List<AmenityDTO> convertJsonToAmenityList(JsonNode responseNode) {
         List<AmenityDTO> amenities = new ArrayList<>();
 
-        if (results != null) {
-            for (PlacesSearchResult result : results) {
-                AmenityDTO dto = new AmenityDTO();
-                dto.setPlaceId(result.placeId);
-                dto.setName(result.name);
-                dto.setVicinity(result.vicinity);
-                dto.setRating(result.rating);
-                dto.setUserRatingsTotal(result.userRatingsTotal);
-                dto.setOpenNow(result.openingHours != null && result.openingHours.openNow);
-                //dto.setHasRestroom(result.restroom); //should work is using the newest NearbySearch
+        if (responseNode != null && responseNode.has("places")) {
+            JsonNode places = responseNode.get("places");
 
-                if (result.geometry != null && result.geometry.location != null) {
-                    dto.setLatitude(result.geometry.location.lat);
-                    dto.setLongitude(result.geometry.location.lng);
-                }
-
-                if (result.types != null && result.types.length > 0) {
-                    dto.setTypes(result.types);
-                }
-
-                //Restroom and Restaurant Information
-                try {
-                    PlaceDetails details = PlacesApi.placeDetails(context, result.placeId).await();
-
-                    dto.setWebsite(details.website.toString());
-                    dto.setPhoneNumber(details.formattedPhoneNumber);
-                    dto.setWheelchairAccessibleEntrance(details.wheelchairAccessibleEntrance);
-                    dto.setPriceLevel(details.priceLevel != null ? details.priceLevel.ordinal() : -1);
-
-                    boolean hasRestroom = false;
-                    boolean isRestaurant = false;
-                    boolean music = false;
-                    if (details.reviews != null) {
-                        for (PlaceDetails.Review review : details.reviews) {
-                            String text = review.text != null ? review.text.toLowerCase() : "";
-                            if (text.toLowerCase().contains("restroom") ||
-                                    text.toLowerCase().contains("toilet") ||
-                                    text.toLowerCase().contains("washroom") ||
-                                    text.toLowerCase().contains("bathroom")) {
-                                hasRestroom = true;
-                                break;
-                            }
-                            if (result.types != null) {
-                                for (String type : result.types) {
-                                    if (type.equalsIgnoreCase("food") || type.equalsIgnoreCase("restaurant") || type.equalsIgnoreCase("cafe") || type.equalsIgnoreCase("bar")) {
-                                        isRestaurant = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (isRestaurant) {
-                                dto.setVegetarianFood(details.servesVegetarianFood);
-                                dto.setDelivery(details.delivery);
-                                dto.setTakeout(details.takeout);
-                                dto.setDineIn(details.dineIn);
-                                dto.setServesBreakfast(details.servesBreakfast);
-                                dto.setServesLunch(details.servesLunch);
-                                dto.setServesDinner(details.servesDinner);
-                                dto.setReservable(details.reservable);
-                            }
-                            if (text.toLowerCase().contains("music")) {
-                                music = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    dto.setMusic(music);
-                    dto.setHasRestroom(hasRestroom);
-
-                } catch (Exception e) {
-                    dto.setHasRestroom(false);
-                }
-                amenities.add(dto);
+            for (JsonNode place : places) {
+                amenities.add(mapPlaceToDTO(place));
             }
         }
 
         return amenities;
     }
+
+    private AmenityDTO mapPlaceToDTO(JsonNode place) {
+        AmenityDTO dto = new AmenityDTO();
+
+        // Basic info
+        if (place.has("id")) {
+            dto.setPlaceId(place.get("id").asText());
+        }
+        if (place.has("displayName") && place.get("displayName").has("text")) {
+            dto.setName(place.get("displayName").get("text").asText());
+        }
+        if (place.has("formattedAddress")) {
+            dto.setVicinity(place.get("formattedAddress").asText());
+        }
+        if (place.has("rating")) {
+            dto.setRating((float) place.get("rating").asDouble());
+        }
+        if (place.has("userRatingCount")) {
+            dto.setUserRatingsTotal(place.get("userRatingCount").asInt());
+        }
+
+        // Location
+        if (place.has("location")) {
+            JsonNode location = place.get("location");
+            if (location.has("latitude")) {
+                dto.setLatitude(location.get("latitude").asDouble());
+            }
+            if (location.has("longitude")) {
+                dto.setLongitude(location.get("longitude").asDouble());
+            }
+        }
+
+        // Types
+        if (place.has("types")) {
+            List<String> typesList = new ArrayList<>();
+            for (JsonNode type : place.get("types")) {
+                typesList.add(type.asText());
+            }
+            dto.setTypes(typesList.toArray(new String[0]));
+        }
+
+        // Contact info
+        if (place.has("websiteUri")) {
+            dto.setWebsite(place.get("websiteUri").asText());
+        }
+        if (place.has("nationalPhoneNumber")) {
+            dto.setPhoneNumber(place.get("nationalPhoneNumber").asText());
+        }
+
+        // Opening hours
+        if (place.has("currentOpeningHours")) {
+            JsonNode openingHours = place.get("currentOpeningHours");
+            if (openingHours.has("openNow")) {
+                dto.setOpenNow(openingHours.get("openNow").asBoolean());
+            }
+        }
+
+        // Accessibility
+        if (place.has("accessibilityOptions")) {
+            JsonNode accessibility = place.get("accessibilityOptions");
+            if (accessibility.has("wheelchairAccessibleEntrance")) {
+                dto.setWheelchairAccessibleEntrance(accessibility.get("wheelchairAccessibleEntrance").asBoolean());
+            }
+        }
+
+        // Price level
+        dto.setPriceLevelString(parsePriceLevel(place));
+
+        // Restroom
+        dto.setHasRestroom(place.has("restroom") && place.get("restroom").asBoolean());
+
+        // Restaurant amenities
+        if (isRestaurant(place)) {
+            setRestaurantFields(dto, place);
+        }
+
+        // Music - would require review parsing
+        dto.setMusic(false);
+
+        return dto;
+    }
+
+    private String parsePriceLevel(JsonNode place) {
+        if (!place.has("priceLevel")) {
+            return "PRICE_LEVEL_UNSPECIFIED";
+        }
+
+        String priceLevel = place.get("priceLevel").asText();
+        switch (priceLevel) {
+            case "PRICE_LEVEL_FREE":
+            case "PRICE_LEVEL_INEXPENSIVE":
+            case "PRICE_LEVEL_MODERATE":
+            case "PRICE_LEVEL_EXPENSIVE":
+            case "PRICE_LEVEL_VERY_EXPENSIVE":
+                return priceLevel;
+            default:
+                return "PRICE_LEVEL_UNSPECIFIED";
+        }
+    }
+
+    private boolean isRestaurant(JsonNode place) {
+        if (!place.has("types")) {
+            return false;
+        }
+
+        for (JsonNode type : place.get("types")) {
+            String typeStr = type.asText().toLowerCase();
+            if (typeStr.equals("restaurant") || typeStr.equals("cafe") ||
+                    typeStr.equals("bar") || typeStr.equals("food")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void setRestaurantFields(AmenityDTO dto, JsonNode place) {
+        if (place.has("servesVegetarianFood")) {
+            dto.setVegetarianFood(place.get("servesVegetarianFood").asBoolean());
+        }
+        if (place.has("delivery")) {
+            dto.setDelivery(place.get("delivery").asBoolean());
+        }
+        if (place.has("takeout")) {
+            dto.setTakeout(place.get("takeout").asBoolean());
+        }
+        if (place.has("dineIn")) {
+            dto.setDineIn(place.get("dineIn").asBoolean());
+        }
+        if (place.has("servesBreakfast")) {
+            dto.setServesBreakfast(place.get("servesBreakfast").asBoolean());
+        }
+        if (place.has("servesLunch")) {
+            dto.setServesLunch(place.get("servesLunch").asBoolean());
+        }
+        if (place.has("servesDinner")) {
+            dto.setServesDinner(place.get("servesDinner").asBoolean());
+        }
+        if (place.has("reservable")) {
+            dto.setReservable(place.get("reservable").asBoolean());
+        }
+    }
 }
 
-// Response DTOs
 @Getter
 @Setter
 class AmenityDTO {
@@ -226,7 +330,7 @@ class AmenityDTO {
     private String phoneNumber;
     private boolean openNow;
     private boolean wheelchairAccessibleEntrance;
-    private int priceLevel;
+    private String priceLevelString;
     private boolean hasRestroom;
     private boolean dineIn;
     private boolean takeout;
@@ -249,7 +353,6 @@ class AmenityResponse {
         this.amenities = amenities;
         this.nextPageToken = nextPageToken;
     }
-
 }
 
 @Getter
@@ -260,5 +363,4 @@ class ErrorResponse {
     public ErrorResponse(String error) {
         this.error = error;
     }
-
 }
