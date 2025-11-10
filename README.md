@@ -205,6 +205,99 @@ RouteScout provides AI-powered location suggestions through the `/suggest` endpo
 - "Suggest parks for a family picnic"
 - "Looking for restaurants with outdoor seating"
 
+#### POST /suggest/POIs
+
+**Description**: Get AI-powered points of interest (POIs) along a route between two locations. This endpoint can find real places along your route, optionally filtered by a natural language query describing what you're looking for.
+
+**URL**: `http://localhost:5001/suggest/POIs`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "origin": "Charleston, SC",
+  "destination": "Columbia, SC",
+  "query": "coffee shops"
+}
+```
+
+**Request Parameters**:
+- `origin` (required): Starting location (address, city, or landmark)
+- `destination` (required): Ending location (address, city, or landmark)
+- `query` (optional): Natural language description of what type of POI you're looking for
+
+**Response** (Success - 200 OK):
+```json
+{
+  "suggestions": [
+    {
+      "name": "Starbucks Coffee",
+      "type": "cafe",
+      "address": "1234 Highway 26, Summerville, SC 29485",
+      "reason": "Popular coffee shop chain with comfortable seating and WiFi"
+    },
+    {
+      "name": "The Daily Grind",
+      "type": "cafe",
+      "address": "5678 Main St, Orangeburg, SC 29115",
+      "reason": "Local coffee shop known for artisan drinks and cozy atmosphere"
+    }
+  ]
+}
+```
+
+**Response** (Error - 400 Bad Request):
+```json
+{
+  "error": "Origin and Destination are required."
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/suggest/POIs`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "origin": "Daniel Island, SC",
+     "destination": "James Island, SC",
+     "query": "gas stations"
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/suggest/POIs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin": "Charleston, SC",
+    "destination": "Columbia, SC",
+    "query": "restaurants"
+  }'
+```
+
+**Example Queries**:
+- "coffee shops" - Find coffee shops along your route
+- "gas stations" - Locate gas stations for refueling
+- "restaurants with outdoor seating" - Find dining options
+- "parks" - Discover parks and rest areas
+- Leave `query` empty for general AI-suggested POIs
+
+**How It Works**:
+- **With query**: The AI parses your natural language query into place types, then searches for real POIs along your route using Google Maps API
+- **Without query**: Returns AI-generated POI suggestions based on the route
+
+**Requirements**:
+- Both `GOOGLE_API_KEY` (for AI parsing) and `GOOGLE_MAPS_API_KEY` (for POI search) must be configured
+- Origin and destination should be valid location strings
+
 ### RouteEndpoints - Route Generation
 
 RouteScout provides route generation and turn-by-turn directions using Google Maps API.
