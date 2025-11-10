@@ -1,9 +1,10 @@
-package edu.citadel.main;
+package edu.citadel.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.HealthEndpoint;
 import org.springframework.boot.actuate.metrics.MetricsEndpoint;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 //reconfigured the "health" endpoint with metrics and values
 @RestController
+@RequestMapping("/status")
 public class CustomHealthController {
 
     private final HealthEndpoint healthEndpoint;
@@ -22,7 +24,7 @@ public class CustomHealthController {
         this.metricsEndpoint = metricsEndpoint;
     }
 
-    @GetMapping(value = "status/health", produces = "application/json")
+    @GetMapping(value = "/health", produces = "application/json")
     public Map<String, Object> getCustomHealth() {
         Map<String, Object> combined = new HashMap<>();
 
