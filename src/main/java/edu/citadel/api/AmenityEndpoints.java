@@ -68,10 +68,15 @@ public class AmenityEndpoints {
 
             return ResponseEntity.ok(new AmenityResponse(amenities, null));
 
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(new ErrorResponse("Error fetching amenities: " + e.getMessage()));
+//        }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ErrorResponse("Error fetching amenities: " + e.getMessage()));
+                    .body(Map.of("error", "Error fetching amenities: " + e.getMessage()));
         }
+
     }
 
     /**
@@ -103,7 +108,7 @@ public class AmenityEndpoints {
         }
     }
 
-    private Map<String, Object> buildSearchRequest(double latitude, double longitude, int radius, List<String> types) {
+    public Map<String, Object> buildSearchRequest(double latitude, double longitude, int radius, List<String> types) {
         Map<String, Object> requestBody = new HashMap<>();
 
         Map<String, Object> locationRestriction = new HashMap<>();
@@ -125,7 +130,7 @@ public class AmenityEndpoints {
         return requestBody;
     }
 
-    private JsonNode makeSearchNearbyRequest(Map<String, Object> requestBody) throws Exception {
+    public JsonNode makeSearchNearbyRequest(Map<String, Object> requestBody) throws Exception {
         URL url = new URL(PLACES_API_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
@@ -159,7 +164,7 @@ public class AmenityEndpoints {
         }
     }
 
-    private List<AmenityDTO> convertJsonToAmenityList(JsonNode responseNode) {
+    public List<AmenityDTO> convertJsonToAmenityList(JsonNode responseNode) {
         List<AmenityDTO> amenities = new ArrayList<>();
 
         if (responseNode != null && responseNode.has("places")) {
@@ -312,46 +317,6 @@ public class AmenityEndpoints {
         if (place.has("reservable")) {
             dto.setReservable(place.get("reservable").asBoolean());
         }
-    }
-}
-
-@Getter
-@Setter
-class AmenityDTO {
-    private String placeId;
-    private String name;
-    private String vicinity;
-    private float rating;
-    private int userRatingsTotal;
-    private double latitude;
-    private double longitude;
-    private String[] types;
-    private String website;
-    private String phoneNumber;
-    private boolean openNow;
-    private boolean wheelchairAccessibleEntrance;
-    private String priceLevelString;
-    private boolean hasRestroom;
-    private boolean dineIn;
-    private boolean takeout;
-    private boolean delivery;
-    private boolean servesBreakfast;
-    private boolean servesLunch;
-    private boolean servesDinner;
-    private boolean vegetarianFood;
-    private boolean music;
-    private boolean reservable;
-}
-
-@Getter
-@Setter
-class AmenityResponse {
-    private List<AmenityDTO> amenities;
-    private String nextPageToken;
-
-    public AmenityResponse(List<AmenityDTO> amenities, String nextPageToken) {
-        this.amenities = amenities;
-        this.nextPageToken = nextPageToken;
     }
 }
 
