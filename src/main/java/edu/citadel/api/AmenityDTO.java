@@ -23,10 +23,10 @@ public class AmenityDTO {
     private boolean dineIn;
     private boolean takeout;
     private boolean delivery;
+    private boolean vegetarianFood;
     private boolean servesBreakfast;
     private boolean servesLunch;
     private boolean servesDinner;
-    private boolean vegetarianFood;
     private boolean music;
     private boolean reservable;
 }

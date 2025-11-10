@@ -34,7 +34,7 @@ public class AmenityEndpointsTest {
 
     @Test
     void testNearestAmenity_Success() throws Exception {
-        // Arrange
+        //test location
         AmenityRequest request = new AmenityRequest();
         request.setLatitude(40.0);
         request.setLongitude(-73.0);
