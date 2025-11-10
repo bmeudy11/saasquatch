@@ -9,6 +9,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.hamcrest.Matchers.is;
+
+import java.util.Arrays;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,7 +28,7 @@ public class RouteEndpointsIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testGenerateRoute_success() throws Exception {
+    public void testGenerateNoWaypointRoute_success() throws Exception {
         // Create a valid request to test
         RouteRequestBody routeRequestBody = new RouteRequestBody();
         routeRequestBody.setOrigin("Harbor Walk East - College of Charleston");
@@ -45,7 +48,7 @@ public class RouteEndpointsIntegrationTest {
     }
 
     @Test
-    public void testGenerateRoute_fail() throws Exception {
+    public void testGenerateNoWaypointRoute_fail() throws Exception {
         // Create an invalid request to test
         RouteRequestBody routeRequestBody = new RouteRequestBody();
         routeRequestBody.setOrigin("Harbor Walk East - College of Charleston");
@@ -54,6 +57,42 @@ public class RouteEndpointsIntegrationTest {
         // Expect a 5xx internal server error
         mockMvc.perform(post("/route/generateRoute").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(routeRequestBody)))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testGenerateWaypointRoute_success() throws Exception {
+        // Create a valid request to test
+        RouteRequestBody routeRequestBody = new RouteRequestBody();
+        routeRequestBody.setOrigin("Charleston, SC");
+        routeRequestBody.setDestination("Columbia, SC");
+        routeRequestBody.setWaypoints(Arrays.asList("Addlestone Library", "SC Aquarium"));
+
+        // Expect a response with the correct origin and destination that includes values for distance and duration as well as an instructions array
+        mockMvc.perform(post("/route/generateRoute").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(routeRequestBody)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.origin").value("Charleston, SC"))
+                .andExpect(jsonPath("$.destination").value("Columbia, SC"))
+                .andExpect(jsonPath("$.waypoints").value(is(Arrays.asList("Addlestone Library", "SC Aquarium"))))
+                .andExpect(jsonPath("$.distance").exists())
+                .andExpect(jsonPath("$.duration").exists())
+                .andExpect(jsonPath("$.instructions").isArray());
+
+    }
+
+    @Test
+    public void testGenerateWaypointRoute_fail() throws Exception {
+        // Create an invalid request to test
+        RouteRequestBody routeRequestBody = new RouteRequestBody();
+        routeRequestBody.setOrigin("Harbor Walk East - College of Charleston");
+        routeRequestBody.setDestination("Thompson Hall - The Citadel");
+        routeRequestBody.setWaypoints(Arrays.asList("Nowhere", "SC Aquarium"));
+
+        // Expect a 5xx internal server error
+        mockMvc.perform(post("/route/generateRoute").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(routeRequestBody)))
                 .andExpect(status().isInternalServerError());
     }
 }
