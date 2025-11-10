@@ -4,6 +4,7 @@ import edu.citadel.api.request.AISuggestionRequestBody;
 import edu.citadel.api.response.AISuggestionResponse;
 import edu.citadel.dal.model.Suggestion;
 import edu.citadel.main.RouteScoutAgent;
+import edu.citadel.services.POISearchService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -19,12 +20,14 @@ import static org.mockito.Mockito.*;
 public class AIEndpointsTest {
 
     private RouteScoutAgent routeScoutAgent;
+    private POISearchService poiSearchService;
     private AIEndpoints aiEndpoints;
 
     @BeforeEach
     void setUp() {
         routeScoutAgent = mock(RouteScoutAgent.class);
-        aiEndpoints = new AIEndpoints(routeScoutAgent);
+        poiSearchService = mock(POISearchService.class);
+        aiEndpoints = new AIEndpoints(routeScoutAgent, poiSearchService);
     }
 
     @Test
@@ -202,7 +205,7 @@ public class AIEndpointsTest {
     @Test
     void testConstructor() {
         // Test that constructor properly initializes dependencies
-        AIEndpoints endpoints = new AIEndpoints(routeScoutAgent);
+        AIEndpoints endpoints = new AIEndpoints(routeScoutAgent, poiSearchService);
         assertNotNull(endpoints);
     }
 

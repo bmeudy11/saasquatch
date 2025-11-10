@@ -12,4 +12,5 @@ import lombok.Setter;
 public class AIPOIsRequestBody {
     private String origin;
     private String destination;
+    private String query;
 }
