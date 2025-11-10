@@ -1,5 +1,6 @@
 package edu.citadel.main;
 
+import edu.citadel.api.CustomHealthController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Health;
