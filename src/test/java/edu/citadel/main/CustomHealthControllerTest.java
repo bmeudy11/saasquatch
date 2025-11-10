@@ -1,5 +1,6 @@
 package edu.citadel.main;
 
+import edu.citadel.api.CustomHealthController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.actuate.health.Health;
@@ -8,7 +9,6 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.actuate.metrics.MetricsEndpoint;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;

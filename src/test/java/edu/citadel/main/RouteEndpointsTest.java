@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,12 +21,11 @@ import static org.mockito.Mockito.*;
 
 public class RouteEndpointsTest {
 
-    private APIKeys apiKeys;
     private RouteEndpoints routeEndpoints;
 
     @BeforeEach
     void setUp() {
-        apiKeys = mock(APIKeys.class);
+        APIKeys apiKeys = mock(APIKeys.class);
         when(apiKeys.getMapsApiKey()).thenReturn("fake-api-key");
         routeEndpoints = new RouteEndpoints(apiKeys);
     }
@@ -37,19 +36,23 @@ public class RouteEndpointsTest {
         DirectionsResult mockResult = new DirectionsResult();
         DirectionsRoute mockRoute = new DirectionsRoute();
         DirectionsLeg mockLeg = new DirectionsLeg();
-        DirectionsStep mockStep1 = new DirectionsStep();
-        DirectionsStep mockStep2 = new DirectionsStep();
-        DirectionsStep mockStep3 = new DirectionsStep();
 
-        mockStep1.htmlInstructions = "Head <b>north</b> on Meeting St";
-        mockStep2.htmlInstructions = "Turn <b>left</b> on King St";
-        mockStep3.htmlInstructions = "Turn <b>left</b> on Calhoun St <div>Destination is on the left</div>";
+        DirectionsStep step1 = new DirectionsStep();
+        step1.htmlInstructions = "Head <b>north</b> on Meeting St";
 
-        mockLeg.steps = new DirectionsStep[]{mockStep1, mockStep2, mockStep3};
+        DirectionsStep step2 = new DirectionsStep();
+        step2.htmlInstructions = "Turn <b>left</b> on King St";
+
+        DirectionsStep step3 = new DirectionsStep();
+        step3.htmlInstructions = "Turn <b>left</b> on Calhoun St <div>Destination is on the left</div>";
+
+        mockLeg.steps = new DirectionsStep[]{step1, step2, step3};
+
         mockLeg.distance = new Distance();
-        mockLeg.distance.humanReadable = "5 mi";
+        mockLeg.distance.inMeters = 8046; // 5 miles approx
+
         mockLeg.duration = new Duration();
-        mockLeg.duration.humanReadable = "10 mins";
+        mockLeg.duration.inSeconds = 600; // 10 minutes
 
         mockRoute.legs = new DirectionsLeg[]{mockLeg};
         mockResult.routes = new DirectionsRoute[]{mockRoute};
@@ -58,34 +61,30 @@ public class RouteEndpointsTest {
         body.setOrigin("Charleston, SC");
         body.setDestination("Summerville, SC");
 
-        // Mock static DirectionsApi.newRequest() call
         try (MockedStatic<DirectionsApi> mockedDirectionsApi = mockStatic(DirectionsApi.class)) {
             DirectionsApiRequest mockRequest = mock(DirectionsApiRequest.class);
             mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any(GeoApiContext.class))).thenReturn(mockRequest);
 
-            when(mockRequest.mode(any(TravelMode.class))).thenReturn(mockRequest);
+            when(mockRequest.mode(any())).thenReturn(mockRequest);
             when(mockRequest.origin(anyString())).thenReturn(mockRequest);
             when(mockRequest.destination(anyString())).thenReturn(mockRequest);
+            when(mockRequest.waypoints(anyString())).thenReturn(mockRequest);
             when(mockRequest.await()).thenReturn(mockResult);
 
-            // Act
             ResponseEntity<?> response = routeEndpoints.generateRoute(body);
 
-            // Assert
             assertEquals(200, response.getStatusCodeValue());
-            assertTrue(response.getBody() instanceof RouteResponse);
-
             RouteResponse routeResponse = (RouteResponse) response.getBody();
+
             assertEquals("Charleston, SC", routeResponse.getOrigin());
             assertEquals("Summerville, SC", routeResponse.getDestination());
-            assertEquals("5 mi", routeResponse.getDistance());
-            assertEquals("10 mins", routeResponse.getDuration());
+            assertEquals("5.0 mi", routeResponse.getDistance());
+            assertEquals("0 hours 10 minutes 0 seconds", routeResponse.getDuration());
 
-            ArrayList<String> instructions = routeResponse.getInstructions();
-            assertEquals(3, instructions.size());
-            assertEquals("Head north on Meeting St.", instructions.get(0));
-            assertEquals("Turn left on King St.", instructions.get(1));
-            assertEquals("Turn left on Calhoun St. Destination is on the left.", instructions.get(2));
+            assertEquals(3, routeResponse.getInstructions().size());
+            assertEquals("Head north on Meeting St.", routeResponse.getInstructions().get(0));
+            assertEquals("Turn left on King St.", routeResponse.getInstructions().get(1));
+            assertEquals("Turn left on Calhoun St. Destination is on the left.", routeResponse.getInstructions().get(2));
         }
     }
 
@@ -97,17 +96,65 @@ public class RouteEndpointsTest {
 
         try (MockedStatic<DirectionsApi> mockedDirectionsApi = mockStatic(DirectionsApi.class)) {
             DirectionsApiRequest mockRequest = mock(DirectionsApiRequest.class);
-            mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any(GeoApiContext.class))).thenReturn(mockRequest);
+            mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any())).thenReturn(mockRequest);
 
-            when(mockRequest.mode(any(TravelMode.class))).thenReturn(mockRequest);
+            when(mockRequest.mode(any())).thenReturn(mockRequest);
             when(mockRequest.origin(anyString())).thenReturn(mockRequest);
             when(mockRequest.destination(anyString())).thenReturn(mockRequest);
+            when(mockRequest.waypoints(anyString())).thenReturn(mockRequest);
             when(mockRequest.await()).thenThrow(new RuntimeException("API Error"));
 
             ResponseEntity<?> response = routeEndpoints.generateRoute(body);
-
             assertEquals(500, response.getStatusCodeValue());
             assertTrue(response.getBody().toString().contains("API Error"));
         }
+    }
+
+    @Test
+    void testGenerateRoute_withWaypoints() throws Exception {
+        DirectionsResult mockResult = new DirectionsResult();
+        DirectionsRoute mockRoute = new DirectionsRoute();
+        DirectionsLeg mockLeg = new DirectionsLeg();
+        mockLeg.steps = new DirectionsStep[]{};
+        mockLeg.distance = new Distance();
+        mockLeg.distance.inMeters = 1000;
+        mockLeg.duration = new Duration();
+        mockLeg.duration.inSeconds = 60;
+        mockRoute.legs = new DirectionsLeg[]{mockLeg};
+        mockResult.routes = new DirectionsRoute[]{mockRoute};
+
+        RouteRequestBody body = new RouteRequestBody();
+        body.setOrigin("A");
+        body.setDestination("B");
+        body.setWaypoints(List.of("Stop1", "Stop2"));
+
+        try (MockedStatic<DirectionsApi> mockedDirectionsApi = mockStatic(DirectionsApi.class)) {
+            DirectionsApiRequest mockRequest = mock(DirectionsApiRequest.class);
+            mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any())).thenReturn(mockRequest);
+
+            when(mockRequest.mode(any())).thenReturn(mockRequest);
+            when(mockRequest.origin(anyString())).thenReturn(mockRequest);
+            when(mockRequest.destination(anyString())).thenReturn(mockRequest);
+
+            // FIXED LINE:
+            when(mockRequest.waypoints(any(String[].class))).thenReturn(mockRequest);
+
+            when(mockRequest.await()).thenReturn(mockResult);
+
+            ResponseEntity<?> response = routeEndpoints.generateRoute(body);
+
+            assertEquals(200, response.getStatusCodeValue());
+            RouteResponse rr = (RouteResponse) response.getBody();
+            assertEquals(List.of("Stop1", "Stop2"), rr.getWaypoints());
+        }
+    }
+
+    @Test
+    void testMakeHumanReadable() throws Exception {
+        var method = RouteEndpoints.class.getDeclaredMethod("makeHumanReadable", String.class);
+        method.setAccessible(true);
+
+        String cleaned = (String) method.invoke(routeEndpoints, "Turn <b>left</b> on King St <div>Destination</div>");
+        assertEquals("Turn left on King St. Destination.", cleaned);
     }
 }

@@ -7,6 +7,8 @@ import com.google.maps.model.TravelMode;
 import edu.citadel.api.request.RouteRequestBody;
 import edu.citadel.api.response.RouteResponse;
 import edu.citadel.dal.keys.APIKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/route")
 public class RouteEndpoints {
     private final GeoApiContext context;
+    private static final Logger logger = LoggerFactory.getLogger(RouteEndpoints.class);
 
     public RouteEndpoints(APIKeys apiKeys) {
         this.context = new GeoApiContext.Builder()
@@ -83,12 +86,12 @@ public class RouteEndpoints {
         try {
 
             // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
-            String waypoints =  "";
+            StringBuilder waypoints = new StringBuilder();
             if (body.getWaypoints() != null) {
                 for (int i = 0; i < body.getWaypoints().size(); i++) {
-                    waypoints += makeHumanReadable(body.getWaypoints().get(i));
+                    waypoints.append(makeHumanReadable(body.getWaypoints().get(i)));
                     if (i < body.getWaypoints().size() - 1) {
-                        waypoints += "|";
+                        waypoints.append("|");
                     }
                 }
             }
@@ -98,7 +101,7 @@ public class RouteEndpoints {
                     .mode(TravelMode.DRIVING)
                     .origin(body.getOrigin())
                     .destination(body.getDestination())
-                    .waypoints(waypoints)
+                    .waypoints(waypoints.toString())
                     .await();
 
             // Add step-by-step driving instructions to instructions
@@ -146,6 +149,7 @@ public class RouteEndpoints {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Error in generateRoute: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
