@@ -67,12 +67,6 @@ public class AmenityEndpoints {
             List<AmenityDTO> amenities = convertJsonToAmenityList(response);
 
             return ResponseEntity.ok(new AmenityResponse(amenities, null));
-
-//        //old catch turned to map
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(new ErrorResponse("Error fetching amenities: " + e.getMessage()));
-//        }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error fetching amenities: " + e.getMessage()));
