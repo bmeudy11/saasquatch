@@ -7,6 +7,8 @@ import com.google.maps.model.TravelMode;
 import edu.citadel.api.request.RouteRequestBody;
 import edu.citadel.api.response.RouteResponse;
 import edu.citadel.dal.keys.APIKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/route")
 public class RouteEndpoints {
     private final GeoApiContext context;
+    private static final Logger logger = LoggerFactory.getLogger(RouteEndpoints.class);
 
     public RouteEndpoints(APIKeys apiKeys) {
         this.context = new GeoApiContext.Builder()
@@ -81,11 +84,24 @@ public class RouteEndpoints {
     @PostMapping("/generateRoute")
     public ResponseEntity<?> generateRoute(@RequestBody RouteRequestBody body) {
         try {
+
+            // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
+            StringBuilder waypoints = new StringBuilder();
+            if (body.getWaypoints() != null) {
+                for (int i = 0; i < body.getWaypoints().size(); i++) {
+                    waypoints.append(makeHumanReadable(body.getWaypoints().get(i)));
+                    if (i < body.getWaypoints().size() - 1) {
+                        waypoints.append("|");
+                    }
+                }
+            }
+
             // Call the Google Maps Directions API for car travel and origin/destination
             DirectionsResult result = DirectionsApi.newRequest(context)
                     .mode(TravelMode.DRIVING)
                     .origin(body.getOrigin())
                     .destination(body.getDestination())
+                    .waypoints(waypoints.toString())
                     .await();
 
             // Add step-by-step driving instructions to instructions
@@ -101,12 +117,39 @@ public class RouteEndpoints {
             RouteResponse response = new RouteResponse();
             response.setOrigin(body.getOrigin());
             response.setDestination(body.getDestination());
-            response.setDistance(result.routes[0].legs[0].distance.humanReadable);
-            response.setDuration(result.routes[0].legs[0].duration.humanReadable);
+
+            // Calculate and save the total distance in miles
+            double distanceInMeters = 0;
+            for (int i = 0; i < result.routes[0].legs.length; i++) {
+                distanceInMeters += result.routes[0].legs[i].distance.inMeters;
+            }
+
+            double distanceInMiles = distanceInMeters * 0.000621371;
+            distanceInMiles = Math.round(distanceInMiles * 100.00) / 100.00;
+
+            String distanceString = String.valueOf(distanceInMiles) + " mi";
+            response.setDistance(distanceString);
+
+            long totalSeconds = 0;
+            for (int i = 0; i < result.routes[0].legs.length; i++) {
+                totalSeconds += result.routes[0].legs[i].duration.inSeconds;
+            }
+
+            int seconds = (int) totalSeconds % 60;
+
+            long totalMinutes = totalSeconds / 60;
+            int minutes = (int) totalMinutes % 60;
+
+            long totalHours = totalMinutes / 60;
+            int hours = (int) totalHours;
+
+            response.setDuration(hours + " hours " +  minutes + " minutes " + seconds + " seconds");
+            response.setWaypoints(body.getWaypoints());
             response.setInstructions(instructions);
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            logger.error("Error in generateRoute: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

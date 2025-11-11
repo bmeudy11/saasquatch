@@ -9,7 +9,6 @@ import org.springframework.boot.actuate.health.Status;
 import org.springframework.boot.actuate.metrics.MetricsEndpoint;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;

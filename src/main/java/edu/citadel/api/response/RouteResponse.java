@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,6 +20,8 @@ public class RouteResponse {
     private String distance;
 
     private String duration;
+
+    private List<String> waypoints;
 
     private ArrayList<String> instructions;
 }
