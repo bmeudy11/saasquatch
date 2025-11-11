@@ -371,6 +371,227 @@ curl -X POST http://localhost:5001/route/generateRoute \
 - Both `origin` and `destination` should be valid location strings (addresses, cities, or landmarks)
 - The endpoint uses Google Maps Directions API for driving routes
 
+### AmenityEndpoints - Nearby Places Search
+
+RouteScout provides nearby places search functionality using Google's Places API (New). These endpoints allow you to find amenities like restaurants, gas stations, parks, and other points of interest near a specific location.
+
+#### POST /nearest/amenity
+
+**Description**: Find amenities near a given location. Returns detailed information about places including ratings, contact information, accessibility options, and restaurant-specific details.
+
+**URL**: `http://localhost:5001/nearest/amenity`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "latitude": 32.7767,
+  "longitude": -79.9309,
+  "radius": 1500,
+  "type": "restaurant"
+}
+```
+
+**Request Parameters**:
+- `latitude` (required): Latitude coordinate of the search center
+- `longitude` (required): Longitude coordinate of the search center
+- `radius` (optional): Search radius in meters (default: 1000, max: 50000)
+- `type` (optional): Type of amenity to search for (e.g., "restaurant", "gas_station", "park", "cafe")
+- `keyword` (optional): Search keyword (currently not implemented in search logic)
+
+**Response** (Success - 200 OK):
+```json
+{
+  "amenities": [
+    {
+      "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+      "name": "The Ordinary",
+      "vicinity": "544 King Street, Charleston, SC 29403",
+      "rating": 4.6,
+      "userRatingsTotal": 1234,
+      "latitude": 32.7876,
+      "longitude": -79.9402,
+      "types": ["restaurant", "seafood_restaurant", "bar"],
+      "website": "https://www.theordinary.com",
+      "phoneNumber": "(843) 414-7060",
+      "openNow": true,
+      "wheelchairAccessibleEntrance": true,
+      "priceLevelString": "PRICE_LEVEL_EXPENSIVE",
+      "hasRestroom": true,
+      "dineIn": true,
+      "takeout": false,
+      "delivery": false,
+      "servesBreakfast": false,
+      "servesLunch": true,
+      "servesDinner": true,
+      "vegetarianFood": true,
+      "reservable": true,
+      "music": false
+    }
+  ],
+  "error": null
+}
+```
+
+**Response** (Error - 500 Internal Server Error):
+```json
+{
+  "error": "Error fetching amenities: API request failed with response code: 403"
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/nearest/amenity`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "latitude": 32.7767,
+     "longitude": -79.9309,
+     "radius": 2000,
+     "type": "cafe"
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/nearest/amenity \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": 32.7767,
+    "longitude": -79.9309,
+    "radius": 1500,
+    "type": "restaurant"
+  }'
+```
+
+**Common Place Types**:
+- `restaurant` - Restaurants
+- `cafe` - Coffee shops and cafes
+- `gas_station` - Gas stations
+- `parking` - Parking facilities
+- `park` - Parks and recreational areas
+- `hospital` - Hospitals and medical facilities
+- `pharmacy` - Pharmacies
+- `grocery_or_supermarket` - Grocery stores
+- `atm` - ATMs and banks
+- `lodging` - Hotels and accommodations
+
+For a complete list of supported types, see [Google Places API Types](https://developers.google.com/maps/documentation/places/web-service/place-types).
+
+#### POST /nearest/amenity/types
+
+**Description**: Search for multiple types of amenities near a location in a single request. This endpoint performs separate searches for each type and combines the results.
+
+**URL**: `http://localhost:5001/nearest/amenity/types`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "latitude": 32.7767,
+  "longitude": -79.9309,
+  "radius": 1500,
+  "types": ["restaurant", "cafe", "gas_station"]
+}
+```
+
+**Request Parameters**:
+- `latitude` (required): Latitude coordinate of the search center
+- `longitude` (required): Longitude coordinate of the search center
+- `radius` (optional): Search radius in meters (default: 1000)
+- `types` (required): Array of place types to search for
+
+**Response** (Success - 200 OK):
+```json
+{
+  "amenities": [
+    {
+      "placeId": "ChIJN1t_tDeuEmsRUsoyG83frY4",
+      "name": "The Ordinary",
+      "vicinity": "544 King Street, Charleston, SC 29403",
+      "rating": 4.6,
+      "types": ["restaurant", "seafood_restaurant", "bar"],
+      ...
+    },
+    {
+      "placeId": "ChIJA2B3kTeuEmsRSomeOtherId",
+      "name": "Kudu Coffee",
+      "vicinity": "4 Vanderhorst Street, Charleston, SC 29403",
+      "rating": 4.8,
+      "types": ["cafe", "coffee_shop"],
+      ...
+    },
+    {
+      "placeId": "ChIJB3C4lTeuEmsRAnotherPlaceId",
+      "name": "Shell Gas Station",
+      "vicinity": "400 King Street, Charleston, SC 29403",
+      "rating": 3.9,
+      "types": ["gas_station", "convenience_store"],
+      ...
+    }
+  ],
+  "error": null
+}
+```
+
+**Response** (Error - 500 Internal Server Error):
+```json
+{
+  "error": "Error fetching amenities by types: API request failed with response code: 400"
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/nearest/amenity/types`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "latitude": 32.7767,
+     "longitude": -79.9309,
+     "radius": 2000,
+     "types": ["restaurant", "cafe", "park"]
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/nearest/amenity/types \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latitude": 32.7767,
+    "longitude": -79.9309,
+    "radius": 1500,
+    "types": ["restaurant", "cafe", "gas_station"]
+  }'
+```
+
+**Use Cases**:
+- Find all essential amenities (restaurants, gas stations, ATMs) near a rest stop
+- Locate dining and entertainment options in a tourist area
+- Search for multiple healthcare facilities (hospitals, pharmacies, clinics)
+
+**Requirements**:
+- The `GOOGLE_MAPS_API_KEY` must be configured in your environment variables or `application.yaml`
+- Valid latitude and longitude coordinates
+- The endpoint uses Google Places API (New) with the `searchNearby` method
+- Maximum of 20 results per type (combined results may contain up to 20 × number of types)
+
 ### Health Check Endpoint
 
 #### GET /actuator/health
