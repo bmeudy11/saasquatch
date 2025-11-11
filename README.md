@@ -592,11 +592,96 @@ curl -X POST http://localhost:5001/nearest/amenity/types \
 - The endpoint uses Google Places API (New) with the `searchNearby` method
 - Maximum of 20 results per type (combined results may contain up to 20 × number of types)
 
-### Health Check Endpoint
+### Health Check Endpoints
+
+RouteScout provides multiple health check endpoints to monitor application status and performance.
+
+#### GET /status/health
+
+**Description**: Enhanced health check endpoint that provides detailed application health status along with system metrics including CPU usage, memory consumption, and HTTP request statistics.
+
+**URL**: `http://localhost:5001/status/health`
+
+**Method**: `GET`
+
+**Response** (Success - 200 OK):
+```json
+{
+  "health": {
+    "status": "UP"
+  },
+  "metrics": {
+    "system.cpu.usage": {
+      "name": "system.cpu.usage",
+      "description": "The recent CPU usage of the system",
+      "baseUnit": "percent",
+      "measurements": [
+        {
+          "statistic": "VALUE",
+          "value": 0.125
+        }
+      ]
+    },
+    "process.cpu.usage": {
+      "name": "process.cpu.usage",
+      "description": "The recent CPU usage of the JVM process",
+      "baseUnit": "percent",
+      "measurements": [
+        {
+          "statistic": "VALUE",
+          "value": 0.0523
+        }
+      ]
+    },
+    "jvm.memory.used": {
+      "name": "jvm.memory.used",
+      "description": "The amount of used memory",
+      "baseUnit": "bytes",
+      "measurements": [
+        {
+          "statistic": "VALUE",
+          "value": 123456789
+        }
+      ]
+    },
+    "http.server.requests": {
+      "name": "http.server.requests",
+      "description": "HTTP server request metrics",
+      "baseUnit": "seconds",
+      "measurements": [
+        {
+          "statistic": "COUNT",
+          "value": 42
+        },
+        {
+          "statistic": "TOTAL_TIME",
+          "value": 1.234
+        }
+      ]
+    }
+  }
+}
+```
+
+**Postman Setup**:
+1. Create a new GET request
+2. Enter URL: `http://localhost:5001/status/health`
+3. Click Send
+
+**cURL Example**:
+```bash
+curl http://localhost:5001/status/health
+```
+
+**Use Cases**:
+- Monitor application health and performance in real-time
+- Track CPU and memory usage for capacity planning
+- Monitor HTTP request metrics for load analysis
+- Integration with monitoring tools and dashboards
 
 #### GET /actuator/health
 
-**Description**: Spring Boot Actuator health check endpoint to verify the application is running.
+**Description**: Standard Spring Boot Actuator health check endpoint to verify the application is running.
 
 **URL**: `http://localhost:5001/actuator/health`
 
@@ -619,7 +704,7 @@ curl -X POST http://localhost:5001/nearest/amenity/types \
 curl http://localhost:5001/actuator/health
 ```
 
-**Note**: The health endpoint is enabled in `application.yaml` under the `management.endpoint.health.enabled` configuration.
+**Note**: This is the standard Spring Boot Actuator health endpoint, enabled in `application.yaml` under the `management.endpoint.health.enabled` configuration. For detailed metrics, use the `/status/health` endpoint instead.
 
 ## Running Tests
 
