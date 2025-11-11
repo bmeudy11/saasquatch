@@ -68,7 +68,7 @@ public class AmenityEndpoints {
 
             return ResponseEntity.ok(new AmenityResponse(amenities, null));
 
-//        //old catch turned to mapping
+//        //old catch turned to map
 //        } catch (Exception e) {
 //            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 //                    .body(new ErrorResponse("Error fetching amenities: " + e.getMessage()));
