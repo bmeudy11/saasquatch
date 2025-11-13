@@ -1,8 +1,26 @@
-# Getting Started with Create React App
+# SAASquatch UI
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (version 14.0 or higher)
+- npm (comes with Node.js)
+
+## Installation
+
+1. Navigate to the UI project directory:
+```bash
+cd ui/saasquatch-ui
+```
+
+2. Install all dependencies:
+```bash
+npm install
+```
+
+## Running the Application
 
 In the project directory, you can run:
 
