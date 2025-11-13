@@ -1,0 +1,431 @@
+@use '../../styles/colors.scss';
+@use '../../styles/animations.scss';
+@use '../../styles/fonts.scss';
+
+#sidebar {
+    margin: 1em 0 1em 1em;
+    padding-bottom: 1em;
+    transition: all .4s ease-in-out;
+    background: colors.$bg1;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-radius: 10px;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    height: calc(100vh - 2.5em);
+    overflow-y: auto;
+
+    &.glass {
+        background: rgba(0, 0, 0, 0.4);
+    }
+}
+
+.sidebar-wrap-div {
+    width: 100%;
+    overflow: auto;
+}
+
+.arrow {
+    margin-top: 1em;
+    transform: translateY(2px);
+    cursor: pointer;
+    animation: animations.$rotate-0;
+
+    &.rotate {
+        animation: animations.$rotate-180;
+        margin-left: -1em;
+    }
+}
+
+.expand-icon {
+    transform: translateY(2px);
+    float: right;
+    cursor: pointer;
+    animation: animations.$rotate-180;
+
+    &.flip {
+        animation: animations.$rotate-0;
+    }
+}
+
+.nav-control-div {
+    margin: 5px;
+    padding: 5px 5px 0 5px;
+    height: fit-content;
+    text-wrap: nowrap;
+    white-space: nowrap;
+    text-align: right;
+
+    img {
+        width: 75px;
+        float: left;
+        animation: animations.$fade-in-longest;
+    }
+}
+
+.nav-button {
+    display: flex-start;
+    justify-content: space-around;
+    align-items: flex-start;
+    background-color: colors.$button-nav;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    margin: 10px 15px;
+    padding: 11px 0;
+    height: 50px;
+    text-align: left;
+    font-size: 20px;
+    transition: all .1s ease-in-out;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    position: relative;
+
+    svg {
+        margin: 0 1em 0 10px;
+        transform: translateY(2px);
+    }
+
+    &.sub-nav {
+        animation: animations.$fade-in-longer;
+        margin-left: 1.5em;
+    }
+
+    &:hover {
+        background-color: colors.$button-nav-hover;
+        padding: 12px 0;
+        border: none;
+        border-left: 10px solid colors.$nav-border-left;
+
+        span {
+            color: colors.$hover-nav;
+            font-weight: bold;
+        }
+
+        svg {
+            outline-width: 5px;
+        }
+    }
+
+    &:active {
+        background-color: colors.$button-nav-active;
+        padding: 12px 0;
+        border: none;
+        border-left: 7.5px solid colors.$nav-border-left-active;
+
+        span {
+            color: colors.$active-font;
+            font-weight: normal;
+        }
+
+        svg {
+            fill: colors.$active-font;
+        }
+    }
+}
+
+.nav-icons {
+    font-size: 35px;
+    transform: translateY(2px);
+    margin: 2.5px auto;
+    padding: 5px 0;
+    width: 100%;
+}
+
+.nav-icons:hover, 
+.flip:hover, 
+.arrow:hover {
+    color: colors.$hover-nav;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.3);
+}
+.flip:hover,
+.arrow:hover {
+    border-radius: 11px;
+}
+
+#nav-list {
+    position: relative;
+    height: fit-content;
+    .nav-link {
+        width: 100%;
+        p {
+            margin-top: 1em;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        p:hover {
+            color: colors.$hover-font;
+        }
+    }
+}
+
+a {
+    text-decoration: none;
+}
+
+.logout {
+    font-family: fonts.$title-font !important;
+    margin: 0 !important;
+    padding: 0;
+
+    &:hover {
+      color: colors.$hover-font;
+      cursor: pointer;
+    }
+}
+
+.logo-font {
+    margin-top: 5px;
+    width: auto;
+    transition: all .4 ease-in-out;
+    span {
+        font-weight: bold;
+        font-size: 20px;
+        margin-right: 8px;
+    }
+}
+
+hr {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.fade {
+    animation: animations.$fade-in-longer;
+}
+
+.account-card {
+    margin: 0 1em;
+    margin-bottom: 1em;
+    padding: 5px 0; 
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+
+    img {
+      margin: 10px 0 auto;
+      width: 25px;
+        border-radius: 50%;
+    }
+
+    span {
+        margin-top: 5px;
+        margin-left: 10px;
+
+        p {
+            font-size: 12px;
+        }
+
+        a {
+            font-family: fonts.$title-font;
+            font-weight: 100;
+            &:hover {
+                color: colors.$hover-font;
+            }
+
+            &:active {
+                color: colors.$active-font;
+            }
+        }
+    }
+}
+
+.build {
+    margin: 1em;
+    padding: 5px 0; 
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    color: colors.$main-font;
+}
+
+@media only all and (min-device-width: 2560px) { 
+    .nav-control-div {
+        img {
+            margin-left: 5.5em;
+        }
+    }
+
+    .arrow {
+        margin-right: 14px;
+    }
+}
+
+@media only all and (min-device-width: 1920px) and (max-device-width: 2559px) {
+    .nav-control-div {
+        img {
+            margin-left: 2.75em;
+        }
+    }
+
+    .arrow {
+        margin-right: 5px;
+    }
+}
+
+@media only all and (min-device-width: 641px) and (max-device-width: 1024px) and (orientation: landscape) {
+    #sidebar {
+        height: calc(100vh - 7em);
+    }
+
+    .logo-font {
+        margin-right: 7px;
+    }
+}
+
+@media only all and (min-device-width: 641px) and (max-device-width: 1024px) and (orientation: portrait) {
+    #sidebar {
+        height: calc(100vh - 4em);
+    }
+
+    .sidebar-closed {
+        width: 50px !important;
+    }
+
+    .nav-button {
+        &.sub-nav {
+            margin-left: 2em;
+        }
+    }
+
+    .logo-font {
+        width: auto;
+        span {
+            margin-right: 15px;
+            img {
+                margin-right: 5px;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 640px) and (orientation: portrait) {
+    .nav-bars-div {
+        transition: all .3s ease-out;
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        position: fixed;
+        top: 0;
+        justify-content: flex-start;
+        align-items: center;
+        z-index: 10;
+        font-size: 25px;
+        margin: 25px;
+        padding: 0 5px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+
+        &:active {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    .bars {
+        fill: #FFF;
+        transition: all .5s ease-out;
+        transform: translateY(4px);
+        &.invisible {
+            fill: transparent;
+        }
+    }
+
+    nav {
+        background: colors.$bg1;
+        width: 250px;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        transition: all .3s ease;
+        z-index: 10;
+    }
+
+    .close-div {
+        margin: 1em;
+        font-size: 25px;
+        transition: all .3s ease;
+    }
+
+    #nav-area {
+        all: initial;
+        width: 100%;
+    }
+}
+
+@media only screen and (max-height: 640px) and (orientation: landscape) {
+    .nav-bars-div {
+        transition: all .3s ease-out;
+        height: fit-content;
+        width: fit-content;
+        display: flex;
+        position: fixed;
+        top: 0;
+        justify-content: flex-start;
+        align-items: center;
+        z-index: 10;
+        font-size: 25px;
+        margin: 25px;
+        padding: 0 5px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+
+        &:active {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    }
+
+    .bars {
+        fill: #FFF;
+        transition: all .5s ease-out;
+        transform: translateY(4px);
+        &.invisible {
+            fill: transparent;
+        }
+    }
+
+    nav {
+        background: colors.$bg1;
+        width: 250px;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: -100%;
+        transition: all .3s ease;
+        z-index: 10;
+    }
+
+    .close-div {
+        margin: 1em;
+        font-size: 25px;
+        transition: all .3s ease;
+    }
+
+    #nav-area {
+        all: initial;
+        width: 100%;
+    }
+}
+
+.open-nav {
+    left: 0;
+    padding-bottom: 4em;
+}

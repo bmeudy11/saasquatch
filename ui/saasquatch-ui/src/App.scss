@@ -1,0 +1,324 @@
+@use './Styles/colors.scss';
+@use './Styles/fonts.scss';
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: fonts.$main-font;
+  word-wrap: break-word;
+}
+
+html, body, main {
+  height: 100vh;
+  width: 100vw;
+}
+
+main {
+  display: flex;
+  justify-content: space-between;
+}
+
+body {
+  background-image: url('./assets/background.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  color: colors.$main-font;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: fonts.$title-font;
+  font-weight: 100;
+}
+
+a {
+  color: colors.$main-font;
+}
+
+strong {
+  font-weight: bolder;
+  color: colors.$bg1;
+}
+
+.main-button {
+  background-color: colors.$button-main;
+  color: colors.$main-font;
+  border: 1.5px solid rgba(0, 0, 0, 0.5);
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin: 10px 5px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.1s ease, box-shadow 0.1s ease, transform 0.1s ease, font-weight 0.1s ease;
+
+  &:hover {
+    background-color: colors.$button-hover;
+    color: colors.$hover-font;
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  &:disabled,
+  [disabled] {
+    border: 1px solid colors.$disabled-border;
+    background-color: colors.$button-disabled;
+    color: colors.$disabled-font;
+    cursor: not-allowed;
+    pointer-events: all !important;
+  }
+
+  &:active {
+    color: colors.$active-font;
+    background-color: colors.$button-active;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+  }
+
+  &.wide {
+    width: 100%;
+  }
+
+  &.search {
+    margin: 0 5px;
+    padding: 5px 10px;
+    font-size: 10px;
+    width: fit-content;
+  }
+}
+
+.main-large {
+  background-color: colors.$button-main;
+  color: colors.$main-font;
+  border: 1.5px solid rgba(0, 0, 0, 0.5);
+  font-size: 22px;
+  font-family: fonts.$title-font;
+  font-weight: 100;
+  padding: 10px 20px;
+  border-radius: 10px;
+  margin: 10px 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease, transform 0.1s ease, font-weight 0.1s ease;
+
+  &:hover {
+    background-color: colors.$button-hover;
+    color: colors.$hover-font;
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  &:disabled,
+  [disabled] {
+    border: 1px solid colors.$disabled-border;
+    background-color: colors.$button-disabled;
+    color: colors.$disabled-font;
+    cursor: not-allowed;
+    pointer-events: all !important;
+  }
+
+  &:active {
+    color: colors.$active-font;
+    background-color: colors.$button-active;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+  }
+}
+
+.outline-button:hover {
+  background-color: colors.$button-hover;
+  border: 1.5px solid rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+  transition: background-color 0.1s ease, box-shadow 0.1s ease, transform 0.1s ease, font-weight 0.1s ease;
+
+  &.secondary {
+    color: colors.$hover-font;
+  }
+}
+
+.outline-button:active {
+  background-color: colors.$button-active;
+  transform: scale(0.95);
+}
+
+.info-message {
+  margin: 0 auto;
+  padding: 10px;
+  width: fit-content;
+  border: 1px solid colors.$main-border;
+  border-radius: 15px;
+  background-color: colors.$bg1;
+}
+
+img {
+  margin: 5px;
+}
+
+.logo-font {
+  font-weight: bold;
+}
+
+input {
+  color: #000;
+}
+
+.translator {
+  transform: translateY(2px);
+}
+
+table {
+  width: 100%;
+  margin: 0 auto;
+  border: 1.5px solid colors.$main-border;
+  border-collapse: collapse;
+}
+
+thead {
+  padding: .2em .5em .2em .5em;
+  text-align: center;
+  white-space: nowrap;
+  color: colors.$main-font;
+}
+
+th, td {
+  border: 1px solid colors.$main-border;
+  padding: .2em .5em .2em .5em;
+  white-space: nowrap;
+  color: colors.$main-font;
+}
+
+td {
+  background-color: colors.$table-bg;
+  text-align: center;
+
+  &.red {
+    background-color: colors.$error-color !important;
+    color: colors.$main-font;
+  }
+
+  &.yellow {
+    background-color: colors.$warn-color !important;
+    color: colors.$main-font;
+  }
+
+  &.green {
+    background-color: colors.$success-color !important;
+    color: colors.$main-font;
+  }
+}
+
+tr:nth-child(even) td {
+  background-color: colors.$table-second-bg;
+}
+
+th {
+  background-color: colors.$table-header-bg;
+  font-weight: normal;
+  text-align: center;
+  font-weight: bold;
+}
+
+tr:hover td {
+  background-color: colors.$table-bg-hover;
+  font-weight: bold;
+  color: colors.$secondary-font;
+
+  &.red {
+    background-color: colors.$table-bg-error-hover !important;
+    color: colors.$main-font;
+    font-weight: bolder;
+  }
+
+  &.yellow {
+    background-color: colors.$table-bg-warn-hover !important;
+    color: colors.$main-font;
+    font-weight: bolder;
+  }
+
+  &.green {
+    background-color: colors.$table-bg-success-hover !important;
+    color: colors.$main-font;
+    font-weight: bolder;
+  }
+}
+
+tr:hover td a {
+  color: colors.$secondary-font;
+}
+
+tr:hover td span {
+  color: colors.$secondary-font;
+}
+
+tr:hover td a span {
+  color: colors.$secondary-font;
+}
+
+tr td a:hover {
+  color: colors.$secondary-hover-font;
+}
+
+tfoot {
+  width: 100%;
+  border: 1px solid colors.$main-font;;
+}
+
+.main-checkbox {
+  .MuiSvgIcon-root {
+    color: colors.$main-font;
+  }
+
+  &.Mui-checked {
+    .MuiSvgIcon-root {
+      color: colors.$checkbox-color;
+    }
+  }
+}
+
+.MuiCircularProgress-colorPrimary {
+  color: colors.$bg1 !important;
+}
+.MuiLinearProgress-root {
+  background-color: colors.$loading-bg !important;
+}
+.MuiLinearProgress-barColorPrimary {
+  background-color: colors.$bg1 !important;
+}
+
+@media only all and (min-device-width: 641px) and (max-device-width: 1024px) and (orientation: portrait) {
+  th, td {
+    white-space: normal;
+  }
+}
+
+@media only all and (max-width: 640px) {
+  main {
+    display: block;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+  }
+
+  html, body, main {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+  }
+
+  .main-button {
+    padding: 5px 10px;
+    margin: 10px 12px;
+    font-family: 'Avenir Heavy' !important;
+  }
+
+  .instrument-button {
+    color: colors.$secondary-font;
+    font-family: 'Avenir Regular';
+  }
+
+  th, td {
+    white-space: normal;
+  }
+}

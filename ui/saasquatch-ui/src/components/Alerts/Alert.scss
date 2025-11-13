@@ -1,0 +1,100 @@
+@use '../../styles/colors.scss';
+@use '../../styles/animations.scss';
+
+.alert {
+    position: relative;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    width: 350px;
+    animation: animations.$fade-in;
+    -webkit-animation: animations.$fade-in;
+    -moz-animation: animations.$fade-in;
+    -o-animation: animations.$fade-in;
+    -ms-animation: animations.$fade-in;
+
+    &.success {
+        background-color: colors.$success-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$success-color, 10%),
+          colors.$success-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.error {
+        background-color: colors.$error-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$error-color, 3%),
+          colors.$error-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.warn {
+        background-color: colors.$warn-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$warn-color, 10%),
+          colors.$warn-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.info {
+        background-color: colors.$info-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$info-color, 10%),
+          colors.$info-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-icons {
+        transform: translateY(3px);
+    }
+
+    .alert-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        cursor: pointer;
+        font-size: 25px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+        transition: all 0.2s ease-in-out;
+        svg {
+            transform: translate(0);
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        &:active {
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+@media only all and (max-width: 640px) {
+    .alert {
+        h2 {
+            font-size: 20px;
+        }
+        p {
+            font-size: 15px;
+        }
+    }
+}
