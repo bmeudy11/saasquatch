@@ -31,47 +31,42 @@ Before setting up RouteScout, ensure you have the following installed:
 4. **Google API Key**: Required for Gemini AI integration
     - Obtain an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-## Environment Variables
+## API Configuration
 
-RouteScout requires the following environment variables to be set:
+RouteScout requires API keys for Google Gemini and Google Maps services. These should be configured directly in the application configuration files.
 
-### Required Environment Variables
+### Required API Keys
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `GOOGLE_API_KEY` | Google Gemini API key for AI-powered location suggestions | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
-| `GOOGLE_MAPS_API_KEY` | Google Maps API key for route generation and directions | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
+| Key | Description | How to Obtain |
+|-----|-------------|---------------|
+| Google API Key | Google Gemini API key for AI-powered location suggestions | [Google AI Studio](https://makersuite.google.com/app/apikey) |
+| Google Maps API Key | Google Maps API key for route generation and directions | [Google Cloud Console](https://console.cloud.google.com/) |
 
-### Setting Environment Variables
+### Setting API Keys
 
-**Mac/Linux**:
-```bash
-export GOOGLE_API_KEY=your_api_key_here
-export GOOGLE_MAPS_API_KEY=your_maps_api_key_here
-```
+Configure your API keys in the YAML configuration files:
 
-**Windows (Command Prompt)**:
-```cmd
-set GOOGLE_API_KEY=your_api_key_here
-set GOOGLE_MAPS_API_KEY=your_maps_api_key_here
-```
-
-**Windows (PowerShell)**:
-```powershell
-$env:GOOGLE_API_KEY="your_api_key_here"
-$env:GOOGLE_MAPS_API_KEY="your_maps_api_key_here"
-```
-
-Alternatively, you can set the `GOOGLE_MAPS_API_KEY` directly in the configuration files:
-- `src/main/resources/application.yaml` (for production/development)
-- `src/main/resources/application-test.yaml` (for testing)
-
-In either file, update line 19:
+**For Production/Development**:
+Edit `src/main/resources/application.yaml`:
 ```yaml
 google:
+  api:
+    key: your_google_api_key_here
   maps:
-    key: ${GOOGLE_MAPS_API_KEY:your_maps_api_key_here}
+    key: your_google_maps_api_key_here
 ```
+
+**For Testing**:
+Edit `src/main/resources/application-test.yaml`:
+```yaml
+google:
+  api:
+    key: your_google_api_key_here
+  maps:
+    key: your_google_maps_api_key_here
+```
+
+**Security Note**: Never commit API keys to version control. Add these configuration files to `.gitignore` or use environment-specific configurations.
 
 ## Getting Started
 
@@ -82,9 +77,9 @@ git clone <repository-url>
 cd saasquatch
 ```
 
-### 2. Set Up Environment Variables
+### 2. Configure API Keys
 
-Set the required `GOOGLE_API_KEY` environment variable as described above.
+Configure your Google API keys in the configuration files as described in the [API Configuration](#api-configuration) section above.
 
 ### 3. Build the Project
 
@@ -295,7 +290,7 @@ curl -X POST http://localhost:5001/suggest/POIs \
 - **Without query**: Returns AI-generated POI suggestions based on the route
 
 **Requirements**:
-- Both `GOOGLE_API_KEY` (for AI parsing) and `GOOGLE_MAPS_API_KEY` (for POI search) must be configured
+- Both `GOOGLE_API_KEY` (for AI parsing) and `GOOGLE_MAPS_API_KEY` (for POI search) must be configured in `application.yaml` or `application-test.yaml`
 - Origin and destination should be valid location strings
 
 ### RouteEndpoints - Route Generation
@@ -587,7 +582,7 @@ curl -X POST http://localhost:5001/nearest/amenity/types \
 - Search for multiple healthcare facilities (hospitals, pharmacies, clinics)
 
 **Requirements**:
-- The `GOOGLE_MAPS_API_KEY` must be configured in your environment variables or `application.yaml`
+- The `GOOGLE_MAPS_API_KEY` must be configured in `application.yaml` or `application-test.yaml`
 - Valid latitude and longitude coordinates
 - The endpoint uses Google Places API (New) with the `searchNearby` method
 - Maximum of 20 results per type (combined results may contain up to 20 × number of types)

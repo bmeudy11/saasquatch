@@ -6,6 +6,7 @@ import com.google.genai.Client;
 import com.google.genai.types.GenerateContentResponse;
 import edu.citadel.api.response.AIPOIsResponse;
 import edu.citadel.api.response.AISuggestionResponse;
+import edu.citadel.dal.keys.APIKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,8 +23,8 @@ public class RouteScoutAgent {
 
     private final Client genaiClient;
 
-    public RouteScoutAgent() {
-        this.genaiClient = new Client();
+    public RouteScoutAgent(APIKeys apiKeys) {
+        this.genaiClient = Client.builder().apiKey(apiKeys.getGeminiApiKey()).build();
     }
 
     public AISuggestionResponse getSuggestions(String message) throws Exception {
