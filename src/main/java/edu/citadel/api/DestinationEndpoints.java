@@ -127,7 +127,7 @@ public class DestinationEndpoints {
             // If the latitude/longitude array is null, the origin is invalid.
             double[] processedResponse = processGeoResponse(response.toString());
             if (processedResponse == null) {
-                return new ResponseEntity<>("Invalid origin location.", HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>("Invalid origin location.", HttpStatus.BAD_REQUEST);
             }
 
             double originLat = processedResponse[0];
