@@ -1,5 +1,6 @@
 package edu.citadel.main;
 
+import edu.citadel.dal.keys.APIKeys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,8 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for RouteScoutAgent that use the REAL Gemini AI API.
@@ -28,7 +31,12 @@ class RouteScoutAgentIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        routeScoutAgent = new RouteScoutAgent();
+        // Create mock APIKeys with real API key from environment
+        APIKeys apiKeys = mock(APIKeys.class);
+        String geminiApiKey = System.getenv("GOOGLE_API_KEY");
+        when(apiKeys.getGeminiApiKey()).thenReturn(geminiApiKey);
+
+        routeScoutAgent = new RouteScoutAgent(apiKeys);
     }
 
     @Test

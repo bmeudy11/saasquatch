@@ -1,6 +1,7 @@
 package edu.citadel.main;
 
 import com.google.genai.Client;
+import edu.citadel.dal.keys.APIKeys;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
@@ -11,13 +12,19 @@ import static org.mockito.Mockito.*;
 
 class RouteScoutAgentTest {
 
+    private APIKeys createMockAPIKeys() {
+        APIKeys mockKeys = mock(APIKeys.class);
+        when(mockKeys.getGeminiApiKey()).thenReturn("test-api-key");
+        return mockKeys;
+    }
+
     @Test
     public void contextLoads() {}
 
     @Test
     void testConstructor_CreatesClientInstance() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             assertNotNull(agent, "RouteScoutAgent should be instantiated");
             assertEquals(1, mockedClient.constructed().size(),
@@ -28,7 +35,7 @@ class RouteScoutAgentTest {
     @Test
     void testConstructor_InitializesGenaiClient() throws Exception {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             Field genaiClientField = RouteScoutAgent.class.getDeclaredField("genaiClient");
             genaiClientField.setAccessible(true);
@@ -41,7 +48,7 @@ class RouteScoutAgentTest {
     @Test
     void testGetSuggestions_WithNullMessage_ThrowsException() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             assertThrows(Exception.class, () -> {
                 agent.getSuggestions(null);
@@ -52,7 +59,7 @@ class RouteScoutAgentTest {
     @Test
     void testGetSuggestions_ErrorHandling() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             Exception exception = assertThrows(Exception.class, () -> {
                 agent.getSuggestions("test message");
@@ -68,7 +75,7 @@ class RouteScoutAgentTest {
     @Test
     void testGetSuggestions_WithEmptyMessage() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             assertThrows(Exception.class, () -> {
                 agent.getSuggestions("");
@@ -79,7 +86,7 @@ class RouteScoutAgentTest {
     @Test
     void testGetSuggestions_WithValidMessage() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             String[] testMessages = {
                     "Find me a coffee shop",
@@ -99,7 +106,7 @@ class RouteScoutAgentTest {
     @Test
     void testGetSuggestions_WithSpecialCharacters() {
         try (MockedConstruction<Client> mockedClient = mockConstruction(Client.class)) {
-            RouteScoutAgent agent = new RouteScoutAgent();
+            RouteScoutAgent agent = new RouteScoutAgent(createMockAPIKeys());
 
             String messageWithSpecialChars = "Find \"coffee\" & tea places! @downtown #trendy";
 
