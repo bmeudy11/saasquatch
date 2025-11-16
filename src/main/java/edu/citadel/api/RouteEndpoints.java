@@ -81,7 +81,7 @@ public class RouteEndpoints {
     }
 
     // Method with primary direction generation logic (allows for internal use)
-    public RouteResponse getDirections(RouteRequestBody body) throws Exception {
+    public RouteResponse getDirections(RouteRequestBody body, String destinationName) throws Exception {
         // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
         StringBuilder waypoints = new StringBuilder();
         if (body.getWaypoints() != null) {
@@ -113,7 +113,7 @@ public class RouteEndpoints {
         // Create the response object
         RouteResponse response = new RouteResponse();
         response.setOrigin(body.getOrigin());
-        response.setDestination(body.getDestination());
+        response.setDestination(destinationName);
 
         // Calculate and save the total distance in miles
         double distanceInMeters = 0;
@@ -151,7 +151,7 @@ public class RouteEndpoints {
     @PostMapping("/generateRoute")
     public ResponseEntity<?> generateRoute(@RequestBody RouteRequestBody body) {
         try {
-            RouteResponse response = getDirections(body);
+            RouteResponse response = getDirections(body, body.getDestination());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error in generateRoute: {}", e.getMessage(), e);

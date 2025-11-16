@@ -102,9 +102,10 @@ public class DestinationEndpoints {
 
     @PostMapping("/generateDestination")
     public ResponseEntity<?> generateDestination(@RequestBody DestinationRequestBody body) {
+        String origin = body.getOrigin().replaceAll("\\s", ""); // Remove all spaces: needed for Geocoding to work
         try {
             // Get the latitude and longitude of the origin location from Google Geocoding API
-            String GEOCODING_URI = "https://maps.googleapis.com/maps/api/geocode/json?address=" + body.getOrigin() + "&key=" + apiKey;
+            String GEOCODING_URI = "https://maps.googleapis.com/maps/api/geocode/json?address=" + origin + "&key=" + apiKey;
             URL url = new URL(GEOCODING_URI);
             HttpURLConnection connection = null;
 
@@ -123,9 +124,12 @@ public class DestinationEndpoints {
             }
             br.close();
 
+            // If the latitude/longitude array is null, the origin is invalid.
             double[] processedResponse = processGeoResponse(response.toString());
+            if (processedResponse == null) {
+                return new ResponseEntity<>("Invalid origin location.", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-            assert processedResponse != null;
             double originLat = processedResponse[0];
             double originLong = processedResponse[1];
 
@@ -133,7 +137,7 @@ public class DestinationEndpoints {
             connection = null;
 
             // Start generating the place to visit: randomly select a type of place from the categories below
-            String[] types = {"restaurant", "cafe", "bakery", "amusement_center", "cultural_center", "movie_theater", "park", "beach", "cultural_landmark"};
+            String[] types = {"restaurant", "cafe", "bakery", "amusement_center", "cultural_center", "movie_theater", "park", "cultural_landmark"};
             Random random = new Random();
             int typeChoiceInt = random.nextInt(types.length);
             String typeChoice = types[typeChoiceInt];
@@ -150,7 +154,7 @@ public class DestinationEndpoints {
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("X-Goog-Api-Key", apiKey);
-            conn.setRequestProperty("X-Goog-FieldMask", "places.id");
+            conn.setRequestProperty("X-Goog-FieldMask", "places.id,places.displayName");
             conn.setDoOutput(true);
             conn.connect();
 
@@ -185,9 +189,17 @@ public class DestinationEndpoints {
             JsonNode placesNode = objectMapper.readTree(placesResponse.toString());
             JsonNode placesArray = placesNode.path("places");
 
+
+            // Handle case where no places found
+            if (placesArray.isEmpty()) {
+                logger.warn("No destination found for type {} at location.", typeChoice);
+                return new ResponseEntity<>(String.format("No destination found for type %s within the specified radius.", typeChoice), HttpStatus.NOT_FOUND);
+            }
+
             // Save the Place ID (must be prefixed with "place_id:" for use in Directions API)
             JsonNode destination = placesArray.get(0);
             String placeId = "place_id:" + destination.get("id").asText();
+            String placeName = destination.path("displayName").path("text").asText();
 
 
             RouteRequestBody routeRequestBody = new RouteRequestBody();
@@ -195,8 +207,13 @@ public class DestinationEndpoints {
             routeRequestBody.setDestination(placeId);
 
             try {
-                RouteResponse routeResponse = routeEndpoints.getDirections(routeRequestBody);
-                return ResponseEntity.ok(routeResponse);
+                RouteResponse routeResponse = routeEndpoints.getDirections(routeRequestBody, placeName);
+
+                Map <String, Object> combinedResponse = new HashMap<>();
+                combinedResponse.put("destinationType", typeChoice);
+
+                combinedResponse.put("routeDetails", routeResponse);
+                return ResponseEntity.ok(combinedResponse);
             } catch (Exception e) {
                 logger.error("Error generating route for random destination with getDirections: {}", e.getMessage());
                 return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
