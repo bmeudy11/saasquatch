@@ -26,6 +26,7 @@ class POISearchServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(apiKeys.getMapsApiKey()).thenReturn("test-api-key");
+        when(apiKeys.getGeminiApiKey()).thenReturn("test-gemini-key");
     }
 
     @Test

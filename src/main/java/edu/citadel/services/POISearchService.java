@@ -43,7 +43,7 @@ public class POISearchService {
         this.geoApiContext = new GeoApiContext.Builder()
                 .apiKey(apiKeys.getMapsApiKey())
                 .build();
-        this.genaiClient = new Client();
+        this.genaiClient = Client.builder().apiKey(apiKeys.getGeminiApiKey()).build();
         logger.info("POISearchService initialized with API keys");
     }
 

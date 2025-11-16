@@ -16,16 +16,18 @@ management:
         include: openapi, swagger-ui
 google:
   maps:
-    key: ${GOOGLE_MAPS_API_KEY:my_api_key}
+    key: ${GOOGLE_MAPS_API_KEY:YOUR_MAPS_KEY}
+  gemini:
+    key: ${GOOGLE_API_KEY:YOUR_GEMINI_KEY}
 server:
   port: 5001
 spring:
   application:
     name: routescout
   datasource:
-    password: my_pwd
-    url: jdbc:postgresql://my_db:my_port/my_user?sslmode=require
-    username: my_user
+    password: YOUR_DB_PASSWORD
+    url: jdbc:postgresql://YOUR_DB_URL:YOUR_DB_PORT/YOUR_DEFAULT_DB
+    username: YOUR_DB_USER
   mvc:
     servlet:
       load-on-startup: 1

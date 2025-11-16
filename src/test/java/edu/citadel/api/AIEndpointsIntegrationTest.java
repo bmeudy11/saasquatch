@@ -48,10 +48,12 @@ class AIEndpointsIntegrationTest {
 
         // Use real API keys from environment
         String mapsApiKey = System.getenv("GOOGLE_MAPS_API_KEY");
+        String geminiApiKey = System.getenv("GOOGLE_API_KEY");
         when(apiKeys.getMapsApiKey()).thenReturn(mapsApiKey);
+        when(apiKeys.getGeminiApiKey()).thenReturn(geminiApiKey);
 
         // Create real instances (not mocked)
-        routeScoutAgent = new RouteScoutAgent();
+        routeScoutAgent = new RouteScoutAgent(apiKeys);
         poiSearchService = new POISearchService(apiKeys);
         aiEndpoints = new AIEndpoints(routeScoutAgent, poiSearchService);
     }

@@ -9,4 +9,7 @@ import lombok.Getter;
 public class APIKeys {
     @Value("${google.maps.key}")
     private String mapsApiKey;
+
+    @Value("${google.gemini.key}")
+    private String geminiApiKey;
 }
