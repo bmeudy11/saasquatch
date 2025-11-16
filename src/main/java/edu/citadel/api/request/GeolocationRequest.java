@@ -13,13 +13,13 @@ public class GeolocationRequest {
     private int locationAreaCode;
     private int mobileCountryCode;
     private int mobileNetworkCode;
-    /*private int ageCell;              optional fields
+    /*private int ageCell;              // commented are optional fields
     private int signalStrengthCell;*/
 
     // wifiAccessPoints input
-    private String macAddress1; // wifiAccessPoint array must contain
-    private String macAddress2; // two or more WiFi access point objects
-    /*private int signalStrengthWifi;   optional fields
+    private String macAddress1;         // wifiAccessPoint array must contain
+    private String macAddress2;         // two or more WiFi access point objects
+    /*private int signalStrengthWifi;   // commented are optional fields
     private int signalToNoiseRatio;
     private int channel;
     private int ageWifi;*/
