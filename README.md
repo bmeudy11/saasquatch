@@ -1,15 +1,31 @@
-# RouteScout
+ # RouteScout
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
 RouteScout is a Spring Boot application that uses Google's Gemini AI to provide intelligent location suggestions based on natural language queries for travel routes.
 
+## Project Structure
+
+RouteScout is a full-stack application consisting of:
+
+- **Backend**: Spring Boot REST API (port 5001)
+  - AI-powered location suggestions using Google Gemini
+  - Route generation with Google Maps API
+  - Nearby places search functionality
+
+- **Frontend**: React UI (port 3000)
+  - User interface for interacting with the RouteScout API
+  - Located in `ui/saasquatch-ui/`
+  - See [UI README](ui/saasquatch-ui/README.md) for detailed frontend setup
+
 ## Prerequisites
 
 Before setting up RouteScout, ensure you have the following installed:
 
 ### Required Software
+
+#### Backend Requirements
 
 1. **Java JDK 17+**: RouteScout requires Java Development Kit 17 or higher
     - **Mac**: Install using Homebrew
@@ -31,6 +47,20 @@ Before setting up RouteScout, ensure you have the following installed:
 4. **Google API Key**: Required for Gemini AI integration
     - Obtain an API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
+#### Frontend Requirements
+
+1. **Node.js 14+**: Required for running the React UI
+    - **Mac**: Install using Homebrew
+      ```bash
+      brew install node
+      ```
+    - **Windows**: Download the installer from [nodejs.org](https://nodejs.org/)
+    - **Verify installation**:
+      ```bash
+      node -v
+      npm -v
+      ```
+      
 ## API Configuration
 
 RouteScout requires API keys for Google Gemini and Google Maps services. These should be configured directly in the application configuration files.
@@ -109,6 +139,38 @@ Once the application is running, you can access:
 ### 6. Success!
 
 You should now have RouteScout running locally!
+
+## Running the Frontend
+
+The RouteScout React UI provides a user-friendly interface for interacting with the backend API.
+
+### 1. Navigate to the UI Directory
+
+```bash
+cd ui/saasquatch-ui
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the Development Server
+
+```bash
+npm start
+```
+
+The UI will start on port `3000` and automatically open in your browser at [http://localhost:3000](http://localhost:3000).
+
+### 4. Connecting to the Backend
+
+Ensure the backend is running on port `5001` before using the UI. The frontend will make API calls to `http://localhost:5001`.
+
+### Additional UI Information
+
+For more detailed information about the UI, including available scripts and configuration options, see the [UI README](ui/saasquatch-ui/README.md).
 
 ## API Endpoints
 

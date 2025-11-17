@@ -1,0 +1,112 @@
+@use '../../styles/colors.scss';
+@use '../../styles/animations.scss';
+
+.alert-banner {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    width: 100%;
+    color: colors.$main-font;
+    text-align: left;
+
+    h2 {
+        margin-bottom: 0 !important;
+        width: fit-content;
+    }
+
+    &.success {
+        background-color: colors.$success-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$success-color, 10%),
+          colors.$success-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.error {
+        background-color: colors.$error-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$error-color, 3%),
+          colors.$error-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.warn {
+        background-color: colors.$warn-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$warn-color, 10%),
+          colors.$warn-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.info {
+        background-color: colors.$info-color;
+        background-image: linear-gradient(
+          to bottom,
+          lighten(colors.$info-color, 10%),
+          colors.$info-color
+        );
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .alert-banner-icons {
+        transform: translateY(3px);
+    }
+
+    .alert-banner-close {
+        margin: 0;
+        padding: 0;
+        float: right;
+        width: fit-content;
+        cursor: pointer;
+        font-size: 25px;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        white-space: nowrap;
+
+        svg {
+            transform: translate(0);
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        &:active {
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+.alert-link {
+    font-weight: bold;
+    text-decoration: underline;
+    &:hover {
+        color: colors.$hover-font;
+    }
+}
+
+@media only all and (max-width: 640px) {
+    .alert-banner {
+        h2 {
+            font-size: 20px;
+            margin-bottom: 0 !important;
+        }
+        p {
+            font-size: 15px;
+            margin: 0 auto !important;
+        }
+    }
+}
