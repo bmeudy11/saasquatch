@@ -6,9 +6,9 @@ import lombok.Setter;
 // Request DTOs
 @Getter
 @Setter
-public class AmenityRequest {
-    private double latitude;
-    private double longitude;
+public class AmenityRequestCurrent {
+    //private double latitude;
+    //private double longitude;
     private int radius;
     private String type;
     //private String keyword;

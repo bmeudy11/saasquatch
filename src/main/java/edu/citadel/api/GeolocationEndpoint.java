@@ -29,8 +29,8 @@ public class GeolocationEndpoint {
     private final String apiKey;
     private final ObjectMapper objectMapper;
     //private static String GEOLOCATION_API_URL = "https://www.googleapis.com/geolocation/v1/geolocate?key=";
-    //private float latitude;
-    //private float longitude;
+    private double latitude;
+    private double longitude;
     private final String geolocationUrl;
     private final WifiScannerService wifiScannerService;
 
@@ -42,7 +42,7 @@ public class GeolocationEndpoint {
         this.wifiScannerService = wifiScannerService;
     }
 
-    @PostMapping("/geolocation")
+    /*@PostMapping("/geolocation")
     public ResponseEntity<?> currentGeolocation(@RequestBody GeolocationRequest request){
         try{
             Map<String, Object> requestBody = buildGeolocationRequest(
@@ -72,7 +72,8 @@ public class GeolocationEndpoint {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error fetching geolocation: " + e.getMessage()));
         }
-    }
+    }*/
+
     @PostMapping("/geolocation/auto")
     public ResponseEntity<?> autoGeolocation() {
         try {
@@ -90,6 +91,9 @@ public class GeolocationEndpoint {
 
             if (response.has("location")) {
                 JsonNode location = response.get("location");
+
+                latitude = location.get("lat").asDouble();
+                longitude = location.get("lng").asDouble();
 
                 Map<String, Object> result = Map.of(
                         "latitude", location.get("lat").asDouble(),
@@ -155,5 +159,13 @@ public class GeolocationEndpoint {
         } else {
             throw new Exception("Geolocation API request failed with response code: " + responseCode);
         }
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
     }
 }

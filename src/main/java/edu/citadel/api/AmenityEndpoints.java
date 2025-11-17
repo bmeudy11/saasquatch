@@ -3,8 +3,10 @@ package edu.citadel.api;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.citadel.api.request.AmenityRequest;
+import edu.citadel.api.request.AmenityRequestCurrent;
 import edu.citadel.api.request.MultiTypeRequest;
 import edu.citadel.dal.keys.APIKeys;
+import edu.citadel.services.WifiScannerService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ import java.util.Map;
 public class AmenityEndpoints {
     private final String apiKey;
     private final ObjectMapper objectMapper;
+    //private final APIKeys apiKeys;
+    //private final WifiScannerService wifiScannerService;
     private static final String PLACES_API_URL = "https://places.googleapis.com/v1/places:searchNearby";
     private static final String FIELD_MASK =
             "places.id,places.displayName,places.formattedAddress,places.location," +
@@ -35,9 +39,11 @@ public class AmenityEndpoints {
                     "places.accessibilityOptions,places.restroom," +
                     "places.servesVegetarianFood,places.delivery,places.takeout,places.dineIn," +
                     "places.servesBreakfast,places.servesLunch,places.servesDinner,places.reservable";
+    private final GeolocationEndpoint geolocationEndpoint;
 
-    public AmenityEndpoints(APIKeys apiKeys) {
+    public AmenityEndpoints(APIKeys apiKeys, GeolocationEndpoint geolocationEndpoint) {
         this.apiKey = apiKeys.getMapsApiKey();
+        this.geolocationEndpoint = geolocationEndpoint;
         this.objectMapper = new ObjectMapper();
     }
 
@@ -102,6 +108,68 @@ public class AmenityEndpoints {
                     .body(new ErrorResponse("Error fetching amenities by types: " + e.getMessage()));
         }
     }
+
+    @PostMapping("/amenity/current-geolocation")
+    public ResponseEntity<?> currentGeolocation(@RequestBody AmenityRequestCurrent request) {
+
+        APIKeys apiKeys = new APIKeys();
+        WifiScannerService wifiScannerService = new WifiScannerService();
+
+        GeolocationEndpoint geo = new GeolocationEndpoint(apiKeys, wifiScannerService);
+        ResponseEntity<?> geoResponse = this.geolocationEndpoint.autoGeolocation();
+
+        // Check if geolocation was successful
+        if (geoResponse.getStatusCode() != HttpStatus.OK) {
+            // Extract the error message from the geolocation response
+            Object body = geoResponse.getBody();
+            String errorMsg = "Failed to get current location";
+
+            if (body instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> errorData = (Map<String, Object>) body;
+                if (errorData.containsKey("error")) {
+                    errorMsg = "Geolocation error: " + errorData.get("error");
+                }
+            }
+
+            System.err.println("Geolocation failed: " + errorMsg);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", errorMsg));
+        }
+
+        // Extract latitude and longitude from the response body
+        @SuppressWarnings("unchecked")
+        Map<String, Object> geoData = (Map<String, Object>) geoResponse.getBody();
+
+        if (geoData == null || !geoData.containsKey("latitude") || !geoData.containsKey("longitude")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Invalid geolocation response"));
+        }
+
+        double latitude = ((Number) geoData.get("latitude")).doubleValue();
+        double longitude = ((Number) geoData.get("longitude")).doubleValue();
+
+        System.out.println(latitude);
+        System.out.println(longitude);
+        try {
+            Map<String, Object> requestBody = buildSearchRequest(
+                    latitude,
+                    longitude,
+                    request.getRadius(),
+                    request.getType() != null && !request.getType().isEmpty() ?
+                            List.of(request.getType().toLowerCase()) : null
+            );
+
+            JsonNode response = makeSearchNearbyRequest(requestBody);
+            List<AmenityDTO> amenities = convertJsonToAmenityList(response);
+
+            return ResponseEntity.ok(new AmenityResponse(amenities, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error fetching amenities: " + e.getMessage()));
+        }
+    }
+
 
     public Map<String, Object> buildSearchRequest(double latitude, double longitude, int radius, List<String> types) {
         Map<String, Object> requestBody = new HashMap<>();

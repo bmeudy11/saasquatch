@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.citadel.api.AmenityEndpoints;
 import edu.citadel.api.AmenityResponse;
+import edu.citadel.api.GeolocationEndpoint;
 import edu.citadel.api.request.AmenityRequest;
 import edu.citadel.dal.keys.APIKeys;
+import edu.citadel.services.WifiScannerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -22,13 +24,15 @@ public class AmenityEndpointsTest {
 
     private AmenityEndpoints amenityEndpoints;
     private APIKeys apiKeys;
+    private GeolocationEndpoint geolocationEndpoint;
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
         apiKeys = mock(APIKeys.class);
+        geolocationEndpoint = mock(GeolocationEndpoint.class);
         when(apiKeys.getMapsApiKey()).thenReturn("dummy-key");
-        amenityEndpoints = Mockito.spy(new AmenityEndpoints(apiKeys));
+        amenityEndpoints = Mockito.spy(new AmenityEndpoints(apiKeys, geolocationEndpoint));
         objectMapper = new ObjectMapper();
     }
 

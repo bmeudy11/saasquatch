@@ -18,7 +18,8 @@ import java.util.Objects;
 @Component
 public class RouteScoutAgent {
     private static final Logger logger = LoggerFactory.getLogger(RouteScoutAgent.class);
-    private final String modelName = "gemini-2.5-flash";
+    private final String modelName = "gemini-2.5-flash-lite";
+    //private final String modelName = "gemini-2.5-flash";
     //private final String modelName = "gemini-2.5-pro";
 
     private final Client genaiClient;
