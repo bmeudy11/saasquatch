@@ -396,7 +396,6 @@ RouteScout provides nearby places search functionality using Google's Places API
 - `longitude` (required): Longitude coordinate of the search center
 - `radius` (optional): Search radius in meters (default: 1000, max: 50000)
 - `type` (optional): Type of amenity to search for (e.g., "restaurant", "gas_station", "park", "cafe")
-- `keyword` (optional): Search keyword (currently not implemented in search logic)
 
 **Response** (Success - 200 OK):
 ```json
@@ -686,6 +685,29 @@ curl -X POST http://localhost:5001/nearest/amenity/current-geolocation \
 - `lodging` - Hotels and accommodations
 
 For a complete list of supported types, see [Google Places API Types](https://developers.google.com/maps/documentation/places/web-service/place-types).
+
+### Geolocation Endpoint
+
+#### GET /current/geolocation/auto
+
+**Description**:  Get your approximate current location in latitude and longitude.
+
+**URL**: `http://localhost:5001/current/geolocation/auto`
+
+**Method**: `GET`
+
+**Response**:
+```json
+{
+  "longitude": -80.8488498,
+  "accessPointsUsed": [],
+  "latitude": 35.1811188
+}
+```
+**Postman Setup**:
+1. Create a new GET request
+2. Enter URL: `http://localhost:5001/current/geolocation/auto`
+3. Click Send
 
 ### Health Check Endpoints
 
