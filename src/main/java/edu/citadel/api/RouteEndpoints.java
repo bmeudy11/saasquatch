@@ -80,73 +80,78 @@ public class RouteEndpoints {
         return cleaned;
     }
 
+    // Method with primary direction generation logic (allows for internal use)
+    public RouteResponse getDirections(RouteRequestBody body, String destinationName) throws Exception {
+        // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
+        StringBuilder waypoints = new StringBuilder();
+        if (body.getWaypoints() != null) {
+            for (int i = 0; i < body.getWaypoints().size(); i++) {
+                waypoints.append(makeHumanReadable(body.getWaypoints().get(i)));
+                if (i < body.getWaypoints().size() - 1) {
+                    waypoints.append("|");
+                }
+            }
+        }
+
+        // Call the Google Maps Directions API for car travel and origin/destination
+        DirectionsResult result = DirectionsApi.newRequest(context)
+                .mode(TravelMode.DRIVING)
+                .origin(body.getOrigin())
+                .destination(body.getDestination())
+                .waypoints(waypoints.toString())
+                .await();
+
+        // Add step-by-step driving instructions to instructions
+        ArrayList<String> instructions = new ArrayList<>();
+        Arrays.stream(result.routes[0].legs).forEach((leg ->
+                Arrays.stream(leg.steps).forEach((step -> {
+                    String instruction = makeHumanReadable(step.htmlInstructions);
+                    instructions.add(instruction);
+                }))
+        ));
+
+        // Create the response object
+        RouteResponse response = new RouteResponse();
+        response.setOrigin(body.getOrigin());
+        response.setDestination(destinationName);
+
+        // Calculate and save the total distance in miles
+        double distanceInMeters = 0;
+        for (int i = 0; i < result.routes[0].legs.length; i++) {
+            distanceInMeters += result.routes[0].legs[i].distance.inMeters;
+        }
+
+        double distanceInMiles = distanceInMeters * 0.000621371;
+        distanceInMiles = Math.round(distanceInMiles * 100.00) / 100.00;
+
+        String distanceString = String.valueOf(distanceInMiles) + " mi";
+        response.setDistance(distanceString);
+
+        long totalSeconds = 0;
+        for (int i = 0; i < result.routes[0].legs.length; i++) {
+            totalSeconds += result.routes[0].legs[i].duration.inSeconds;
+        }
+
+        int seconds = (int) totalSeconds % 60;
+
+        long totalMinutes = totalSeconds / 60;
+        int minutes = (int) totalMinutes % 60;
+
+        long totalHours = totalMinutes / 60;
+        int hours = (int) totalHours;
+
+        response.setDuration(hours + " hours " +  minutes + " minutes " + seconds + " seconds");
+        response.setWaypoints(body.getWaypoints());
+        response.setInstructions(instructions);
+
+        return response;
+    }
+
     // Accepts a POST request with origin and destination Strings (e.g. "Charleston, SC")
     @PostMapping("/generateRoute")
     public ResponseEntity<?> generateRoute(@RequestBody RouteRequestBody body) {
         try {
-
-            // Convert the input list into a String of waypoints separated by the "|" character (needed for Google)
-            StringBuilder waypoints = new StringBuilder();
-            if (body.getWaypoints() != null) {
-                for (int i = 0; i < body.getWaypoints().size(); i++) {
-                    waypoints.append(makeHumanReadable(body.getWaypoints().get(i)));
-                    if (i < body.getWaypoints().size() - 1) {
-                        waypoints.append("|");
-                    }
-                }
-            }
-
-            // Call the Google Maps Directions API for car travel and origin/destination
-            DirectionsResult result = DirectionsApi.newRequest(context)
-                    .mode(TravelMode.DRIVING)
-                    .origin(body.getOrigin())
-                    .destination(body.getDestination())
-                    .waypoints(waypoints.toString())
-                    .await();
-
-            // Add step-by-step driving instructions to instructions
-            ArrayList<String> instructions = new ArrayList<>();
-            Arrays.stream(result.routes[0].legs).forEach((leg ->
-                    Arrays.stream(leg.steps).forEach((step -> {
-                        String instruction = makeHumanReadable(step.htmlInstructions);
-                        instructions.add(instruction);
-                    }))
-            ));
-
-            // Create the response object
-            RouteResponse response = new RouteResponse();
-            response.setOrigin(body.getOrigin());
-            response.setDestination(body.getDestination());
-
-            // Calculate and save the total distance in miles
-            double distanceInMeters = 0;
-            for (int i = 0; i < result.routes[0].legs.length; i++) {
-                distanceInMeters += result.routes[0].legs[i].distance.inMeters;
-            }
-
-            double distanceInMiles = distanceInMeters * 0.000621371;
-            distanceInMiles = Math.round(distanceInMiles * 100.00) / 100.00;
-
-            String distanceString = String.valueOf(distanceInMiles) + " mi";
-            response.setDistance(distanceString);
-
-            long totalSeconds = 0;
-            for (int i = 0; i < result.routes[0].legs.length; i++) {
-                totalSeconds += result.routes[0].legs[i].duration.inSeconds;
-            }
-
-            int seconds = (int) totalSeconds % 60;
-
-            long totalMinutes = totalSeconds / 60;
-            int minutes = (int) totalMinutes % 60;
-
-            long totalHours = totalMinutes / 60;
-            int hours = (int) totalHours;
-
-            response.setDuration(hours + " hours " +  minutes + " minutes " + seconds + " seconds");
-            response.setWaypoints(body.getWaypoints());
-            response.setInstructions(instructions);
-
+            RouteResponse response = getDirections(body, body.getDestination());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error in generateRoute: {}", e.getMessage(), e);
