@@ -7,10 +7,7 @@ import edu.citadel.dal.keys.APIKeys;
 import edu.citadel.services.WifiScannerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -74,7 +71,7 @@ public class GeolocationEndpoint {
         }
     }*/
 
-    @PostMapping("/geolocation/auto")
+    @GetMapping("/geolocation/auto")
     public ResponseEntity<?> autoGeolocation() {
         try {
             // scan nearby Wi-Fi
