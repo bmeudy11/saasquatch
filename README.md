@@ -587,6 +587,106 @@ curl -X POST http://localhost:5001/nearest/amenity/types \
 - The endpoint uses Google Places API (New) with the `searchNearby` method
 - Maximum of 20 results per type (combined results may contain up to 20 × number of types)
 
+#### POST /nearest/amenity/current-geolocation
+**Description**: Find amenities near your approximate location. Returns detailed information about places including ratings, contact information, accessibility options, and restaurant-specific details.
+
+**URL**: `http://localhost:5001/nearest/amenity/current-geolocation`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+  **Request Body**:
+```json
+{
+  "radius": 1500,
+  "type": "restaurant"
+}
+```
+
+**Request Parameters**:
+- `radius` (required): Search radius in meters (default: 1000, max: 50000)
+- `type` (required): Type of amenity to search for (e.g., "restaurant", "gas_station", "park", "cafe")
+
+**Response** (Success - 200 OK):
+```json
+{
+"amenities": [
+  {
+    "placeId": "ChIJyz5Va1SeVogR8h36vS53-Po",
+    "name": "Chick-fil-A",
+    "vicinity": "1540 E Woodlawn Rd, Charlotte, NC 28209, USA",
+    "rating": 4.5,
+    "userRatingsTotal": 1779,
+    "latitude": 35.171641199999996,
+    "longitude": -80.8498977,
+    "types": ["fast_food_restaurant", "breakfast_restaurant", "catering_service", "food_delivery", "restaurant", "food", "point_of_interest", "establishment"],
+    "website": "https://www.chick-fil-a.com/locations/nc/east-woodlawn-road?utm_source=yext&utm_medium=link",
+    "phoneNumber": "(704) 601-6031",
+    "openNow": true,
+    "wheelchairAccessibleEntrance": true,
+    "priceLevelString": "PRICE_LEVEL_INEXPENSIVE",
+    "hasRestroom": true,
+    "dineIn": false,
+    "takeout": true,
+    "delivery": true,
+    "servesBreakfast": true,
+    "servesLunch": true,
+    "servesDinner": true,
+    "vegetarianFood": false,
+    "music": false,
+    "reservable": false
+  }
+],
+  "error": null
+}
+```
+
+**Response** (Error - 500 Internal Server Error):
+```json
+{
+  "error": "Error fetching amenities: API request failed with response code: 400"
+}
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/nearest/amenity/current-geolocation`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "radius": 2000,
+     "type": "cafe"
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/nearest/amenity/current-geolocation \
+  -H "Content-Type: application/json" \
+  -d '{
+    "radius": 1500,
+    "type": "restaurant"
+  }'
+```
+
+**Common Place Types**:
+- `restaurant` - Restaurants
+- `cafe` - Coffee shops and cafes
+- `gas_station` - Gas stations
+- `parking` - Parking facilities
+- `park` - Parks and recreational areas
+- `hospital` - Hospitals and medical facilities
+- `pharmacy` - Pharmacies
+- `grocery_or_supermarket` - Grocery stores
+- `atm` - ATMs and banks
+- `lodging` - Hotels and accommodations
+
+For a complete list of supported types, see [Google Places API Types](https://developers.google.com/maps/documentation/places/web-service/place-types).
+
 ### Health Check Endpoints
 
 RouteScout provides multiple health check endpoints to monitor application status and performance.
