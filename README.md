@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-RouteScout is a Spring Boot application that uses Google's Gemini AI to provide intelligent location suggestions based on natural language queries for travel routes.
+RouteScout is an AI-powered travel assistant built with Spring Boot that combines Google's Gemini AI and Google Maps API to provide intelligent location suggestions, discover points of interest along your route, generate turn-by-turn driving directions, and find nearby amenities. Simply describe what you're looking for in natural language, and RouteScout will help you plan your journey with personalized recommendations.
 
 ## Project Structure
 
@@ -934,6 +934,11 @@ Heroku datasource then you will need to set the following settings on the Advanc
 ![Datasource](./images/datasource_settings.png)
 
 ## Resources
+
+### Github
+
+Github project link: https://github.com/users/bmeudy11/projects/1
+Github repository: https://github.com/bmeudy11/saasquatch.git
 
 ### Spring Boot
 
