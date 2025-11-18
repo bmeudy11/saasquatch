@@ -3,7 +3,7 @@ package edu.citadel.main;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.citadel.api.AmenityEndpoints;
-import edu.citadel.api.AmenityResponse;
+import edu.citadel.api.response.AmenityResponse;
 import edu.citadel.api.GeolocationEndpoint;
 import edu.citadel.api.request.AmenityRequest;
 import edu.citadel.api.request.AmenityRequestCurrent;
