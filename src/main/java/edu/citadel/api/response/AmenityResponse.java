@@ -1,5 +1,6 @@
-package edu.citadel.api;
+package edu.citadel.api.response;
 
+import edu.citadel.api.AmenityDTO;
 import lombok.Getter;
 import lombok.Setter;
 

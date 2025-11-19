@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.citadel.api.request.AmenityRequest;
 import edu.citadel.api.request.AmenityRequestCurrent;
 import edu.citadel.api.request.MultiTypeRequest;
+import edu.citadel.api.response.AmenityResponse;
+import edu.citadel.api.response.ErrorResponse;
 import edu.citadel.dal.keys.APIKeys;
 import edu.citadel.services.WifiScannerService;
 import lombok.Getter;
@@ -383,12 +385,4 @@ public class AmenityEndpoints {
     }
 }
 
-@Getter
-@Setter
-class ErrorResponse {
-    private String error;
 
-    public ErrorResponse(String error) {
-        this.error = error;
-    }
-}
