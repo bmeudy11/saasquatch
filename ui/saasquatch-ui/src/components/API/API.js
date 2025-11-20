@@ -64,7 +64,23 @@ export const generateRoute = async (routeData) => {
     );
 };
 
-/* AMENITY ENDPOINTS
+/**
+ * Generate a random destination and route from an origin
+ * @param {Object} destinationData
+ * @param {string} destinationData.origin - Starting location (e.g., "Charleston, SC")
+ * @param {number} destinationData.radius - Radius in feet to search for random destination
+ * @returns {Promise<[boolean, object]>} [success, data with destination and route info]
+ */
+export const generateRandomDestination = async (destinationData) => {
+    return handleRequest(() =>
+        api.post('/destination/generateDestination', {
+            origin: destinationData.origin,
+            radius: destinationData.radius
+        })
+    );
+};
+
+/* Amenity Endpoints
  * Find amenities near a specific location
  * @param {Object} amenityData
  * @param {number} amenityData.latitude

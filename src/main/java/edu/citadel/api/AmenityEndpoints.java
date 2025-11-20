@@ -28,6 +28,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/nearest")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AmenityEndpoints {
     private final String apiKey;
     private final ObjectMapper objectMapper;
