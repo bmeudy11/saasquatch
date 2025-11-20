@@ -120,6 +120,14 @@ export const findAmenitiesByTypes = async (amenityData) => {
 };
 
 
+/* GEOLOCATION ENDPOINT
+ * Get current location using WiFi-based geolocation
+ * @returns {Promise<[boolean, object]>} [success, {latitude, longitude, accessPointsUsed}]
+ */
+export const getCurrentLocation = async () => {
+    return handleRequest(() => api.get('/current/geolocation/auto'));
+};
+
 /* AI ENDPOINTS (Google Gemini)
  * Health check for AI service
  * @returns {Promise<[boolean, object]>} [success, data]
