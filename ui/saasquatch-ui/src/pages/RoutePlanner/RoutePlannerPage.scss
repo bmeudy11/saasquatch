@@ -68,6 +68,22 @@
     width: 100%;
     text-align: left;
   }
+
+  .status {
+    width: fit-content;
+    margin: 1em auto;
+    padding: 1em;
+    border: 1px solid colors.$main-border;
+    border-radius: 2em;
+
+    &.online {
+      background-color: colors.$success-color;;
+    }
+
+    &.offline {
+      background-color: colors.$error-color;
+    }
+  }
 }
 
 .form-section {
