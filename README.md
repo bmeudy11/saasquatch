@@ -428,6 +428,118 @@ curl -X POST http://localhost:5001/route/generateRoute \
 - Both `origin` and `destination` should be valid location strings (addresses, cities, or landmarks)
 - The endpoint uses Google Maps Directions API for driving routes
 
+### DestinationEndpoints - Random Destination Generator
+
+RouteScout can generate a random destination near your location and provide driving directions to get there.
+
+#### POST /destination/generateDestination
+
+**Description**: Generate a random destination within a specified radius from your starting point and receive turn-by-turn directions to get there. The endpoint randomly selects from various destination types including restaurants, cafes, bakeries, amusement centers, cultural centers, movie theaters, parks, and cultural landmarks.
+
+**URL**: `http://localhost:5001/destination/generateDestination`
+
+**Method**: `POST`
+
+**Headers**:
+- `Content-Type`: `application/json`
+
+**Request Body**:
+```json
+{
+  "origin": "Charleston, SC",
+  "radius": 5000
+}
+```
+
+**Request Parameters**:
+- `origin` (required): Starting location (address, city, or landmark)
+- `radius` (required): Search radius in meters (0.0 to 50000.0)
+
+**Response** (Success - 200 OK):
+```json
+{
+  "destinationType": "cafe",
+  "routeDetails": {
+    "origin": "Charleston, SC",
+    "destination": "Kudu Coffee & Craft Beer",
+    "distance": "2.3 mi",
+    "duration": "8 mins",
+    "instructions": [
+      "Head north on Meeting St toward George St.",
+      "Turn left onto Spring St.",
+      "Turn right onto King St.",
+      "Destination will be on the left."
+    ]
+  }
+}
+```
+
+**Response** (Error - 400 Bad Request):
+```json
+"Invalid origin location."
+```
+
+**Response** (Error - 404 Not Found):
+```json
+"No destination found for type cafe within the specified radius."
+```
+
+**Response** (Error - 500 Internal Server Error):
+```json
+"Error message describing what went wrong"
+```
+
+**Postman Setup**:
+1. Create a new POST request
+2. Enter URL: `http://localhost:5001/destination/generateDestination`
+3. Select the **Body** tab
+4. Choose **raw** and select **JSON** from the dropdown
+5. Enter the JSON request body:
+   ```json
+   {
+     "origin": "Harbor Walk East - College of Charleston",
+     "radius": 10000
+   }
+   ```
+6. Click Send
+
+**cURL Example**:
+```bash
+curl -X POST http://localhost:5001/destination/generateDestination \
+  -H "Content-Type: application/json" \
+  -d '{
+    "origin": "Charleston, SC",
+    "radius": 5000
+  }'
+```
+
+**How It Works**:
+1. Converts your origin location to coordinates using Google Geocoding API
+2. Randomly selects a destination type from:
+   - `restaurant` - Dining establishments
+   - `cafe` - Coffee shops and cafes
+   - `bakery` - Bakeries and pastry shops
+   - `amusement_center` - Entertainment venues
+   - `cultural_center` - Cultural institutions
+   - `movie_theater` - Cinema and theaters
+   - `park` - Parks and outdoor spaces
+   - `cultural_landmark` - Historical and cultural landmarks
+3. Searches for a place of that type within your specified radius using Google Places API
+4. Generates turn-by-turn driving directions from your origin to the destination
+5. Returns both the destination type and complete route details
+
+**Use Cases**:
+- Discover new places when you're feeling adventurous
+- Find something to do nearby without having to decide what
+- Generate spontaneous date ideas or outing destinations
+- Break out of routine by visiting random local spots
+
+**Requirements**:
+- The `GOOGLE_MAPS_API_KEY` must be configured in `application.yaml` or `application-test.yaml`
+- Origin should be a valid location string that can be geocoded
+- Radius must be between 0.0 and 50000.0 meters
+- The endpoint uses Google Geocoding API, Google Places API (New), and Google Maps Directions API
+
 ### AmenityEndpoints - Nearby Places Search
 
 RouteScout provides nearby places search functionality using Google's Places API (New). These endpoints allow you to find amenities like restaurants, gas stations, parks, and other points of interest near a specific location.
