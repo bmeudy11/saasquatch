@@ -74,8 +74,8 @@ export function Home(props) {
                         <div>
                             <img src={placeholder} alt='image-placeholder' style={sideBarOpen ? {width: arcadeWidth} : {}} />
                         </div>
-                        <Link to="/api-dashboard">
-                            <button className="main-button">API</button>
+                        <Link to="/plan-a-route">
+                            <button className="main-button">Route Planner</button>
                         </Link>
                     </div>
                     <div id="home-content-right" className={sideBarOpen ? 'open' : ''}>

@@ -1,0 +1,97 @@
+@use '../../styles/colors.scss';
+@use '../../styles/animations.scss';
+
+#route-planner-section {
+  transition: all 0.3s ease-in-out;
+  animation: animations.$fade-in;
+}
+
+.route-planner-wrapper-div {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  box-shadow: 0 4px 30px rgba(132, 116, 116, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3 ease;
+  margin: 1em 1em 1em 10px;
+  width: auto;
+  height: calc(100vh - 2.5em);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  text-align: center;
+  text-wrap: wrap;
+}
+
+.route-planner-content {
+  width: 100%;
+  height: 100%;
+  flex-wrap: wrap;
+  text-align: center;
+
+  .endpoints-div {
+    width: fit-content;
+    margin: 1em auto;
+    padding: 2em;
+    border: 1px solid colors.$main-border;
+    border-radius: 10px;
+  }
+
+  h1 {
+    margin: 0;
+  }
+
+  h3, h4 {
+    margin: 10px 0;
+  }
+
+  a {
+    text-decoration: underline;
+    font-weight: bold;
+    margin: 0;
+  }
+
+  p {
+    margin: 1em;
+  }
+
+  pre {
+    background: colors.$data-window;
+    padding: 16px;
+    color: #0f0;
+    font-size: 14px;
+    overflow: auto;
+    margin-Bottom: 5px;
+    border-radius: 10px;
+    width: 100%;
+    text-align: left;
+  }
+}
+
+.form-section {
+  width: fit-content;
+  margin: 1em auto;
+  padding: 2em;
+  border: 1px solid colors.$main-border;
+  border-radius: 10px;
+
+  h2 {
+    margin-bottom: 10px;
+  }
+}
+
+.toggle-group {
+  label {
+    margin-right: 10px;
+  }
+
+  input {
+    margin: auto 4px;
+  }
+}
+
+.address-input, .location-section {
+  margin-top: 1em;
+}

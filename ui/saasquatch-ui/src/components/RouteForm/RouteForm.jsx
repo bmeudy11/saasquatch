@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { getCurrentLocation as getLocationFromAPI } from '../../components/API/API';
+import { getCurrentLocation } from '../API/API';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * RouteForm Component
@@ -8,7 +9,8 @@ import { getCurrentLocation as getLocationFromAPI } from '../../components/API/A
  */
 
  //state vars
-function RouteForm({ onSubmit, loading }) {
+export default function RouteForm(props) {
+    const { onSubmit, loading, alert } = props;
     // State for origin
     const [originType, setOriginType] = useState('manual'); // 'manual' or 'location'
     const [originAddress, setOriginAddress] = useState('');
@@ -20,20 +22,30 @@ function RouteForm({ onSubmit, loading }) {
     const [radius, setRadius] = useState(50000); // Default 50,000 feet (~9.5 miles)
 
     // Get user's current location using geolocation endpoint
-    const getCurrentLocation = async () => {
+    const getCurrentLocationHandler = async () => {
         setGettingLocation(true);
 
-        const [success, result] = await getLocationFromAPI();
+        const [success, result] = await getCurrentLocation();
         //success/failure handing
         if (success) {
             // API returns: { latitude, longitude, accessPointsUsed }
             const { latitude, longitude } = result;
             setOriginAddress(`${latitude},${longitude}`);
             setGettingLocation(false);
-            alert('Location acquired successfully!');
+            const msgPayload =  {
+                id: uuidv4(),
+                type: 'success',
+                message: 'Location acquired successfully!',
+            };
+            alert(msgPayload);
         } else {
             setGettingLocation(false);
-            alert(`Failed to get location: ${result}`);
+            const msgPayload =  {
+                id: uuidv4(),
+                type: 'error',
+                message: `Failed to get location: ${result}`,
+            };
+            alert(msgPayload);
         }
     };
 
@@ -41,19 +53,36 @@ function RouteForm({ onSubmit, loading }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        let msgPayload =  {
+            id: uuidv4(),
+            type: 'error',
+        };
+
         // Validate inputs
         if (!originAddress && originType === 'manual') {
-            alert('Please enter an origin address');
+            msgPayload = {
+                ...msgPayload,
+                message: 'Please enter an origin address',
+            }
+            alert(msgPayload);
             return;
         }
 
         if (!originAddress && originType === 'location') {
-            alert('Please get your current location first');
+            msgPayload = {
+                ...msgPayload,
+                message: 'Please get your current location first',
+            }
+            alert(msgPayload);
             return;
         }
 
         if (!destinationAddress && destinationType === 'manual') {
-            alert('Please enter a destination address');
+            msgPayload = {
+                ...msgPayload,
+                message: 'Please enter a destination address',
+            }
+            alert(msgPayload);
             return;
         }
 
@@ -83,7 +112,7 @@ function RouteForm({ onSubmit, loading }) {
         <form onSubmit={handleSubmit} className="route-form">
             {/* ORIGIN SECTION */}
             <div className="form-section">
-                <h3>Origin</h3>
+                <h2>Origin</h2>
 
                 <div className="toggle-group">
                     <label>
@@ -120,9 +149,9 @@ function RouteForm({ onSubmit, loading }) {
                     <div className="location-section">
                         <button
                             type="button"
-                            onClick={getCurrentLocation}
+                            onClick={getCurrentLocationHandler}
                             disabled={gettingLocation}
-                            className="location-button"
+                            className="main-button"
                         >
                             {gettingLocation ? 'Getting Location...' : 'Get Current Location'}
                         </button>
@@ -137,7 +166,7 @@ function RouteForm({ onSubmit, loading }) {
 
             {/* DESTINATION SECTION */}
             <div className="form-section">
-                <h3>Destination</h3>
+                <h2>Destination</h2>
 
                 <div className="toggle-group">
                     <label>
@@ -158,7 +187,7 @@ function RouteForm({ onSubmit, loading }) {
                             checked={destinationType === 'random'}
                             onChange={(e) => setDestinationType(e.target.value)}
                         />
-                        Random Destination
+                        Find Within a Radius
                     </label>
                 </div>
 
@@ -184,7 +213,7 @@ function RouteForm({ onSubmit, loading }) {
                             className="radius-input"
                         />
                         <p className="radius-help">
-                            ~{Math.round(radius / 5280)} miles
+                            {(radius / 5280).toFixed(2)} miles
                         </p>
                     </div>
                 )}
@@ -195,14 +224,14 @@ function RouteForm({ onSubmit, loading }) {
                 <button
                     type="submit"
                     disabled={loading || gettingLocation}
-                    className="generate-button"
+                    className="main-button"
                 >
                     {loading ? 'Generating Route...' : 'Generate Route'}
                 </button>
                 <button
                     type="button"
                     onClick={handleClear}
-                    className="clear-button"
+                    className="main-button"
                 >
                     Clear
                 </button>
@@ -210,5 +239,3 @@ function RouteForm({ onSubmit, loading }) {
         </form>
     );
 }
-
-export default RouteForm;
