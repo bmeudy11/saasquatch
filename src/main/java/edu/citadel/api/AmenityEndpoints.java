@@ -9,8 +9,6 @@ import edu.citadel.api.response.AmenityResponse;
 import edu.citadel.api.response.ErrorResponse;
 import edu.citadel.dal.keys.APIKeys;
 import edu.citadel.services.WifiScannerService;
-import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +29,6 @@ import java.util.Map;
 public class AmenityEndpoints {
     private final String apiKey;
     private final ObjectMapper objectMapper;
-    //private final APIKeys apiKeys;
-    //private final WifiScannerService wifiScannerService;
     private static final String PLACES_API_URL = "https://places.googleapis.com/v1/places:searchNearby";
     private static final String FIELD_MASK =
             "places.id,places.displayName,places.formattedAddress,places.location," +
@@ -56,8 +52,7 @@ public class AmenityEndpoints {
      *   "latitude": 40.758896,
      *   "longitude": -73.985130,
      *   "radius": 1500,
-     *   "type": "restaurant",
-     *   "keyword": "pizza"
+     *   "type": "restaurant"
      * }
      */
     @PostMapping("/amenity")
