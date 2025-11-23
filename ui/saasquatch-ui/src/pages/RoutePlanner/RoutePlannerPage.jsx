@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import RouteForm from '../../components/RouteForm/RouteForm';
-import {generateRandomDestination, getServerHealth} from '../../components/API/API';
+import {generateRandomDestination, generateRoute, getServerHealth} from '../../components/API/API';
 import { v4 as uuidv4 } from 'uuid';
 import './RoutePlannerPage.scss';
 
@@ -36,11 +36,27 @@ export function RoutePlannerPage(props) {
 
     const submitHandler = async (data) => {
         setLoading(true);
-        const payload = {
-            origin: data.originAddress,
-            radius: data.radius,
+
+        let success, result;
+
+        // Check which destination type was selected
+        if (data.destinationType === 'random') {
+            // Random destination
+            const payload = {
+                origin: data.originAddress,
+                radius: data.radius,
+            };
+            [success, result] = await generateRandomDestination(payload);
+        } else {
+            // Manual destination
+            const payload = {
+                origin: data.originAddress,
+                destination: data.destinationAddress,
+                waypoints: []
+            };
+            [success, result] = await generateRoute(payload);
         }
-        const [success, result] = await generateRandomDestination(payload);
+
         if (success) {
             setGeneratedRoute(result);
             const msgPayload =  {
@@ -74,8 +90,7 @@ export function RoutePlannerPage(props) {
                     </div>
                     <div id="destination-endpoints-div">
                         <div className="endpoints-div">
-                            <h1>Destination Endpoints</h1>
-                            <h4>(/destination/generateDestination)</h4>
+                            <h1>Route Planner</h1>
                             <RouteForm
                                 alert={alert}
                                 onSubmit={submitHandler}

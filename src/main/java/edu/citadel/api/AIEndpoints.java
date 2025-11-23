@@ -19,7 +19,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/suggest")
-@CrossOrigin(origins = "http://localhost:3000")
 public class AIEndpoints {
     private static final Logger logger = LoggerFactory.getLogger(AIEndpoints.class);
 
