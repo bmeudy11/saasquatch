@@ -4,9 +4,11 @@ import com.google.maps.DirectionsApi;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
+import edu.citadel.api.request.GeoRouteRequestBody;
 import edu.citadel.api.request.RouteRequestBody;
 import edu.citadel.api.response.RouteResponse;
 import edu.citadel.dal.keys.APIKeys;
+import edu.citadel.services.WifiScannerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,11 +28,14 @@ import java.util.stream.Collectors;
 public class RouteEndpoints {
     private final GeoApiContext context;
     private static final Logger logger = LoggerFactory.getLogger(RouteEndpoints.class);
+    private final APIKeys apiKeys;
 
     public RouteEndpoints(APIKeys apiKeys) {
         this.context = new GeoApiContext.Builder()
                 .apiKey(apiKeys.getMapsApiKey())
                 .build();
+
+        this.apiKeys = apiKeys;
     }
 
     private String makeHumanReadable(String instruction) {
@@ -156,6 +162,38 @@ public class RouteEndpoints {
         } catch (Exception e) {
             logger.error("Error in generateRoute: {}", e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/generateGeoRoute")
+    public ResponseEntity<?> generateGeoRoute(@RequestBody GeoRouteRequestBody body) {
+        try {
+            // Fetch the user's current location
+            GeolocationEndpoint geoEndpoint = new GeolocationEndpoint(this.apiKeys, new WifiScannerService());
+            Map<String, Object> originLatLng = geoEndpoint.fetchCurrentGeolocation();
+
+            // If the response contains an error key, indicate a bad request
+            if (originLatLng.containsKey("error")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Google did not return a location."));
+            }
+
+            // Put the latitude and longitude into a single string
+            String latitude =  originLatLng.get("latitude").toString();
+            String longitude =  originLatLng.get("longitude").toString();
+            String origin = latitude + "," + longitude;
+
+
+            // Call the getDirections method using the current location as origin
+            RouteRequestBody requestBody = new RouteRequestBody();
+            requestBody.setOrigin(origin);
+            requestBody.setDestination(body.getDestination());
+            requestBody.setWaypoints(body.getWaypoints());
+            RouteResponse response = getDirections(requestBody, body.getDestination());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

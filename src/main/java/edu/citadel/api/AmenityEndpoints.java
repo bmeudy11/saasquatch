@@ -110,7 +110,7 @@ public class AmenityEndpoints {
     }
 
     @PostMapping("/amenity/current-geolocation")
-    public ResponseEntity<?> currentGeolocation(@RequestBody AmenityRequestCurrent request) {
+    public ResponseEntity<?> currentGeolocation(@RequestBody AmenityRequestCurrent request) throws Exception {
 
         APIKeys apiKeys = new APIKeys();
         WifiScannerService wifiScannerService = new WifiScannerService();
