@@ -29,13 +29,15 @@ public class RouteEndpoints {
     private final GeoApiContext context;
     private static final Logger logger = LoggerFactory.getLogger(RouteEndpoints.class);
     private final APIKeys apiKeys;
+    private final GeolocationEndpoint geoEndpoint;
 
-    public RouteEndpoints(APIKeys apiKeys) {
+    public RouteEndpoints(APIKeys apiKeys, GeolocationEndpoint geoEndpoint) {
         this.context = new GeoApiContext.Builder()
                 .apiKey(apiKeys.getMapsApiKey())
                 .build();
 
         this.apiKeys = apiKeys;
+        this.geoEndpoint = geoEndpoint;
     }
 
     private String makeHumanReadable(String instruction) {
@@ -169,7 +171,6 @@ public class RouteEndpoints {
     public ResponseEntity<?> generateGeoRoute(@RequestBody GeoRouteRequestBody body) {
         try {
             // Fetch the user's current location
-            GeolocationEndpoint geoEndpoint = new GeolocationEndpoint(this.apiKeys, new WifiScannerService());
             Map<String, Object> originLatLng = geoEndpoint.fetchCurrentGeolocation();
 
             // If the response contains an error key, indicate a bad request

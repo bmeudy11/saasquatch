@@ -5,15 +5,19 @@ import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.*;
 import edu.citadel.api.RouteEndpoints;
+import edu.citadel.api.GeolocationEndpoint;
+import edu.citadel.api.request.GeoRouteRequestBody;
 import edu.citadel.api.request.RouteRequestBody;
 import edu.citadel.api.response.RouteResponse;
 import edu.citadel.dal.keys.APIKeys;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,12 +26,16 @@ import static org.mockito.Mockito.*;
 public class RouteEndpointsTest {
 
     private RouteEndpoints routeEndpoints;
+    private GeolocationEndpoint mockGeoEndpoint;
 
     @BeforeEach
     void setUp() {
         APIKeys apiKeys = mock(APIKeys.class);
         when(apiKeys.getMapsApiKey()).thenReturn("fake-api-key");
-        routeEndpoints = new RouteEndpoints(apiKeys);
+
+        mockGeoEndpoint = mock(GeolocationEndpoint.class);
+
+        routeEndpoints = new RouteEndpoints(apiKeys, mockGeoEndpoint);
     }
 
     @Test
@@ -156,5 +164,92 @@ public class RouteEndpointsTest {
 
         String cleaned = (String) method.invoke(routeEndpoints, "Turn <b>left</b> on King St <div>Destination</div>");
         assertEquals("Turn left on King St. Destination.", cleaned);
+    }
+
+    @Test
+    void testGenerateGeoRoute_success() throws Exception {
+        // Prepare mock DirectionsResult
+        DirectionsResult mockResult = new DirectionsResult();
+        DirectionsRoute mockRoute = new DirectionsRoute();
+        DirectionsLeg mockLeg = new DirectionsLeg();
+
+        DirectionsStep step1 = new DirectionsStep();
+        step1.htmlInstructions = "Head <b>north</b> on Meeting St";
+
+        DirectionsStep step2 = new DirectionsStep();
+        step2.htmlInstructions = "Turn <b>left</b> on King St";
+
+        DirectionsStep step3 = new DirectionsStep();
+        step3.htmlInstructions = "Turn <b>left</b> on Calhoun St <div>Destination is on the left</div>";
+
+        mockLeg.steps = new DirectionsStep[]{step1, step2, step3};
+
+        mockLeg.distance = new Distance();
+        mockLeg.distance.inMeters = 8046; // 5 miles approx
+
+        mockLeg.duration = new Duration();
+        mockLeg.duration.inSeconds = 600; // 10 minutes
+
+        mockRoute.legs = new DirectionsLeg[]{mockLeg};
+        mockResult.routes = new DirectionsRoute[]{mockRoute};
+
+        GeoRouteRequestBody body = new GeoRouteRequestBody();
+        body.setDestination("Summerville, SC");
+
+        final String MOCK_LAT_LNG = "32.7833,-79.932";
+        when(mockGeoEndpoint.fetchCurrentGeolocation()).thenReturn(Map.of("latitude", 32.7833, "longitude", -79.932));
+
+        try (MockedStatic<DirectionsApi> mockedDirectionsApi = mockStatic(DirectionsApi.class)) {
+            DirectionsApiRequest mockRequest = mock(DirectionsApiRequest.class);
+            mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any(GeoApiContext.class))).thenReturn(mockRequest);
+
+            when(mockRequest.mode(any())).thenReturn(mockRequest);
+            when(mockRequest.origin(anyString())).thenReturn(mockRequest);
+            when(mockRequest.destination(anyString())).thenReturn(mockRequest);
+            when(mockRequest.waypoints(anyString())).thenReturn(mockRequest);
+            when(mockRequest.await()).thenReturn(mockResult);
+
+            ResponseEntity<?> response = routeEndpoints.generateGeoRoute(body);
+
+            assertEquals(200, response.getStatusCodeValue());
+            RouteResponse routeResponse = (RouteResponse) response.getBody();
+
+            assertEquals(MOCK_LAT_LNG, routeResponse.getOrigin());
+            assertEquals("Summerville, SC", routeResponse.getDestination());
+            assertEquals("5.0 mi", routeResponse.getDistance());
+            assertEquals("0 hours 10 minutes 0 seconds", routeResponse.getDuration());
+
+            assertEquals(3, routeResponse.getInstructions().size());
+            assertEquals("Head north on Meeting St.", routeResponse.getInstructions().get(0));
+            assertEquals("Turn left on King St.", routeResponse.getInstructions().get(1));
+            assertEquals("Turn left on Calhoun St. Destination is on the left.", routeResponse.getInstructions().get(2));
+        }
+    }
+
+    @Test
+    void testGenerateGeoRoute_failure() throws Exception {
+        GeoRouteRequestBody body = new GeoRouteRequestBody();
+        body.setDestination("Nowhere");
+
+        when(mockGeoEndpoint.fetchCurrentGeolocation()).thenReturn(Map.of("error", "Google did not return a location."));
+
+        try (MockedStatic<DirectionsApi> mockedDirectionsApi = mockStatic(DirectionsApi.class)) {
+            DirectionsApiRequest mockRequest = mock(DirectionsApiRequest.class);
+            mockedDirectionsApi.when(() -> DirectionsApi.newRequest(any())).thenReturn(mockRequest);
+
+            ResponseEntity<?> response = routeEndpoints.generateGeoRoute(body);
+
+            // Check the status code: should be "bad request" for this error
+            assertEquals(400, response.getStatusCodeValue(), "Expected 400 status code due to geolocation error.");
+
+            // Check the error message output
+            @SuppressWarnings("unchecked")
+            Map<String, String> errorBody = (Map<String, String>) response.getBody();
+            assertEquals("Google did not return a location.", errorBody.get("error"),
+                    "Expected the following error message: Google did not return a location.");
+
+            // The Directions API call should have been skipped because of the geolocation error
+            verify(mockRequest, never()).await();
+        }
     }
 }
