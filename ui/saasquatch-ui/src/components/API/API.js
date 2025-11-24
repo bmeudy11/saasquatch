@@ -127,6 +127,20 @@ export const findAmenitiesByTypes = async (amenityData) => {
     );
 };
 
+/** Find amenities near a current location
+ * @param {Object} amenityData
+ * @param {number} amenityData.radius - Search radius in meters
+ * @param {string} amenityData.type - Type of amenity (e.g., "restaurant", "gas_station")
+ * @returns {Promise<[boolean, object]>} [success, data]
+ */
+export const findAmenitiesByCurrentLocation = async (amenityData) => {
+    return handleRequest(() =>
+        api.post('/nearest/amenity/current-geolocation', {
+            radius: amenityData.radius || 1500,
+            type: amenityData.type
+        })
+    );
+};
 
 /** GEOLOCATION ENDPOINT
  * Get current location using WiFi-based geolocation

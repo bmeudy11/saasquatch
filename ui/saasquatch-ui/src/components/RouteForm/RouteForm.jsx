@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 
  //state vars
 export default function RouteForm(props) {
-    const { onSubmit, loading, alert } = props;
+    const { onSubmit, loading, alert, updateGeneratedRoute } = props;
     // State for origin
     const [originType, setOriginType] = useState('manual'); // 'manual' or 'location'
     const [originAddress, setOriginAddress] = useState('');
@@ -106,6 +106,7 @@ export default function RouteForm(props) {
         setOriginType('manual');
         setDestinationType('manual');
         setRadius(50000);
+        updateGeneratedRoute(undefined);
     };
 
     return (

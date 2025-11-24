@@ -1,14 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet';
 import RouteForm from '../../components/RouteForm/RouteForm';
-import {generateRandomDestination, generateRoute, getServerHealth} from '../../components/API/API';
+import {
+    findAmenitiesByCurrentLocation,
+    findAmenitiesByTypes, findNearbyAmenity,
+    generateRandomDestination,
+    generateRoute,
+    getServerHealth
+} from '../../components/API/API';
 import { v4 as uuidv4 } from 'uuid';
 import './RoutePlannerPage.scss';
+import NearestAmenityForm from "../../components/NearestAmenityForm/NearestAmenityForm";
 
 export function RoutePlannerPage(props) {
     const { sideBarOpen, alert } = props;
-    const [loading, setLoading] = useState(false);
+    const [loadingRoute, setLoadingRoute] = useState(false);
+    const [loadingAmenity, setLoadingAmenity] = useState(false);
     const [generatedRoute, setGeneratedRoute] = useState();
+    const [amenities, setAmenities] = useState();
     const [health, setHealth] = useState();
     const [healthError, setHealthError] = useState();
 
@@ -35,7 +44,7 @@ export function RoutePlannerPage(props) {
     }, [getHealth, health, healthError]);
 
     const submitHandler = async (data) => {
-        setLoading(true);
+        setLoadingRoute(true);
 
         let success, result;
 
@@ -73,7 +82,44 @@ export function RoutePlannerPage(props) {
             };
             alert(msgPayload);
         }
-        setLoading(false);
+        setLoadingRoute(false);
+    };
+
+    const submitAmenityHandler = async (originType, singleType, data) => {
+        setLoadingAmenity(true);
+
+        let success, result;
+
+        // Check which destination type was selected
+        if (originType !== 'manual') {
+            // Amenities based on current location
+            [success, result] = await findAmenitiesByCurrentLocation(data);
+        } else {
+            if (singleType) {
+                [success, result] = await findNearbyAmenity(data);
+            } else {
+                [success, result] = await findAmenitiesByTypes(data);
+            }
+
+        }
+
+        if (success) {
+            setAmenities(result);
+            const msgPayload =  {
+                id: uuidv4(),
+                type: 'success',
+                message: 'Amenities found successfully!',
+            };
+            alert(msgPayload);
+        } else {
+            const msgPayload =  {
+                id: uuidv4(),
+                type: 'error',
+                message: `Failed to find amenities: ${result}`,
+            };
+            alert(msgPayload);
+        }
+        setLoadingAmenity(false);
     };
 
     return (
@@ -94,13 +140,28 @@ export function RoutePlannerPage(props) {
                             <RouteForm
                                 alert={alert}
                                 onSubmit={submitHandler}
-                                loading={loading}
+                                loading={loadingRoute}
+                                updateGeneratedRoute={setGeneratedRoute}
                             />
 
                             {generatedRoute && (
                                 <>
                                     <h3>Generated Route Data:</h3>
                                     <pre>{JSON.stringify(generatedRoute, null, 4)}</pre>
+                                </>
+                            )}
+
+                            <NearestAmenityForm
+                                alert={alert}
+                                onSubmit={submitAmenityHandler}
+                                loading={loadingAmenity}
+                                updateAmenity={setAmenities}
+                            />
+
+                            {amenities && (
+                                <>
+                                    <h3>Amenities Data:</h3>
+                                    <pre>{JSON.stringify(amenities, null, 4)}</pre>
                                 </>
                             )}
                         </div>

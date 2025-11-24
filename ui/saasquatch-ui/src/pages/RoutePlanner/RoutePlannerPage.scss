@@ -111,3 +111,27 @@
 .address-input, .location-section {
   margin-top: 1em;
 }
+
+#lat, #long {
+  width: 49%;
+}
+
+#lat {
+  margin-right: 2%;
+}
+
+.types-div {
+  margin: 1em auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 5px;
+  }
+
+  select {
+    padding: 7px;
+  }
+}
