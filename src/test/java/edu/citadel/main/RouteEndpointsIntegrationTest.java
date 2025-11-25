@@ -1,18 +1,23 @@
 package edu.citadel.main;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.citadel.api.GeolocationEndpoint;
+import edu.citadel.api.request.GeoRouteRequestBody;
 import edu.citadel.api.request.RouteRequestBody;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.hamcrest.Matchers.is;
 
 import java.util.Arrays;
+import java.util.Map;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -26,6 +31,9 @@ public class RouteEndpointsIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockBean
+    private GeolocationEndpoint mockGeoEndpoint;
 
     @Test
     public void testGenerateNoWaypointRoute_success() throws Exception {
@@ -94,5 +102,46 @@ public class RouteEndpointsIntegrationTest {
         mockMvc.perform(post("/route/generateRoute").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(routeRequestBody)))
                 .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testGenerateGeoRoute_success() throws Exception {
+        // Create a request body and set a destination for the test
+        GeoRouteRequestBody routeRequestBody = new GeoRouteRequestBody();
+        routeRequestBody.setDestination("Thompson Hall - The Citadel");
+
+        // Mock the latitude and longitude output by the fetchCurrentGeolocation method
+        final String MOCK_LAT = "32.7833";
+        final String MOCK_LNG = "-79.932";
+        final String ORIGIN = MOCK_LAT + "," + MOCK_LNG;
+        when(mockGeoEndpoint.fetchCurrentGeolocation()).thenReturn(Map.of("latitude", Double.valueOf(MOCK_LAT), "longitude", Double.valueOf(MOCK_LNG)));
+
+        // Verify the output from a POST request with the input above
+        mockMvc.perform(post("/route/generateGeoRoute").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(routeRequestBody)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.origin").value(ORIGIN))
+                .andExpect(jsonPath("$.destination").value("Thompson Hall - The Citadel"))
+                .andExpect(jsonPath("$.distance").exists())
+                .andExpect(jsonPath("$.duration").exists())
+                .andExpect(jsonPath("$.instructions").isArray());
+    }
+
+    @Test
+    public void testGenerateGeoRoute_fail() throws Exception {
+        // Create a request body and set a destination for the test
+        GeoRouteRequestBody routeRequestBody = new GeoRouteRequestBody();
+        routeRequestBody.setDestination("Thompson Hall - The Citadel");
+
+        // Mock an error output by the fetchCurrentGeolocation method
+        when(mockGeoEndpoint.fetchCurrentGeolocation()).thenReturn(Map.of("error", "Google did not return a location."));
+
+        // Verify the output from a POST request with the input above
+        mockMvc.perform(post("/route/generateGeoRoute").contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(routeRequestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.error").value("Google did not return a location."));
     }
 }

@@ -38,6 +38,22 @@ public class GeolocationEndpoint {
     @GetMapping("/geolocation/auto")
     public ResponseEntity<?> autoGeolocation() {
         try {
+            Map<String, Object> result = fetchCurrentGeolocation();
+
+            if (result.containsKey("error")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Google did not return a location."));
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed: " + e.getMessage()));
+        }
+    }
+
+    // Method with Geolocation logic to allow for internal use with other endpoints
+    public Map<String, Object> fetchCurrentGeolocation() throws Exception {
             // scan nearby Wi-Fi
             List<String> macs = wifiScannerService.getNearbyWifiMacs();
 
@@ -56,22 +72,14 @@ public class GeolocationEndpoint {
                 latitude = location.get("lat").asDouble();
                 longitude = location.get("lng").asDouble();
 
-                Map<String, Object> result = Map.of(
+                return Map.of(
                         "latitude", location.get("lat").asDouble(),
                         "longitude", location.get("lng").asDouble(),
                         "accessPointsUsed", macs
                 );
-
-                return ResponseEntity.ok(result);
             }
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Google did not return a location."));
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed: " + e.getMessage()));
-        }
+            return Map.of("error", "Google did not return a location.");
     }
 
     public Map<String, Object> buildGeolocationRequest(String macAddress1, String macAddress2) {
