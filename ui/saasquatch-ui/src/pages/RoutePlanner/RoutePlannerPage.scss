@@ -32,11 +32,43 @@
   text-align: center;
 
   .endpoints-div {
-    width: fit-content;
+    max-width: 1400px;
+    width: 100%;
     margin: 1em auto;
     padding: 2em;
     border: 1px solid colors.$main-border;
     border-radius: 10px;
+  }
+
+  .forms-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    margin: 2em 0;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-column {
+    border: 1px solid colors.$main-border;
+    border-radius: 10px;
+    padding: 1.5em;
+
+    h2 {
+      margin-top: 0;
+    }
+
+    h3 {
+      margin-top: 1.5em;
+    }
+  }
+
+  .results-section {
+    margin-top: 2em;
+    padding-top: 2em;
+    border-top: 2px solid colors.$main-border;
   }
 
   h1 {
@@ -65,8 +97,11 @@
     overflow: auto;
     margin-Bottom: 5px;
     border-radius: 10px;
-    width: 100%;
+    max-width: 100%;
+    max-height: 400px;
     text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
 
   .status {

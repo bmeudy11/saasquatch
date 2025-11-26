@@ -11,6 +11,7 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import './RoutePlannerPage.scss';
 import NearestAmenityForm from "../../components/NearestAmenityForm/NearestAmenityForm";
+import MapDisplay from "../../components/MapDisplay";
 
 export function RoutePlannerPage(props) {
     const { sideBarOpen, alert } = props;
@@ -137,32 +138,46 @@ export function RoutePlannerPage(props) {
                     <div id="destination-endpoints-div">
                         <div className="endpoints-div">
                             <h1>Route Planner</h1>
-                            <RouteForm
-                                alert={alert}
-                                onSubmit={submitHandler}
-                                loading={loadingRoute}
-                                updateGeneratedRoute={setGeneratedRoute}
-                            />
 
+                            {/* Forms Container - Side by Side */}
+                            <div className="forms-container">
+                                <div className="form-column">
+                                    <h2>Route Planning</h2>
+                                    <RouteForm
+                                        alert={alert}
+                                        onSubmit={submitHandler}
+                                        loading={loadingRoute}
+                                        updateGeneratedRoute={setGeneratedRoute}
+                                    />
+                                </div>
+
+                                <div className="form-column">
+                                    <h2>Find Amenities</h2>
+                                    <NearestAmenityForm
+                                        alert={alert}
+                                        onSubmit={submitAmenityHandler}
+                                        loading={loadingAmenity}
+                                        updateAmenity={setAmenities}
+                                    />
+
+                                    {amenities && (
+                                        <>
+                                            <h3>Amenities Found:</h3>
+                                            <pre>{JSON.stringify(amenities, null, 4)}</pre>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Results Section - Full Width Below */}
                             {generatedRoute && (
-                                <>
+                                <div className="results-section">
                                     <h3>Generated Route Data:</h3>
                                     <pre>{JSON.stringify(generatedRoute, null, 4)}</pre>
-                                </>
-                            )}
 
-                            <NearestAmenityForm
-                                alert={alert}
-                                onSubmit={submitAmenityHandler}
-                                loading={loadingAmenity}
-                                updateAmenity={setAmenities}
-                            />
-
-                            {amenities && (
-                                <>
-                                    <h3>Amenities Data:</h3>
-                                    <pre>{JSON.stringify(amenities, null, 4)}</pre>
-                                </>
+                                    <h3>Route Map:</h3>
+                                    <MapDisplay routeData={generatedRoute} />
+                                </div>
                             )}
                         </div>
                     </div>
