@@ -1,4 +1,4 @@
-
+  
 # SAASquatch UI
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -66,6 +66,8 @@ src/
 │   ├── API/            # API integration layer
 │   │   └── API.js      # Axios client and API functions
 │   ├── Alerts/         # Alert notification system
+│   ├── MapDisplay/     # Google Maps integration
+│   │   └── MapDisplay.jsx
 │   ├── RouteForm/      # Route form component
 │   │   └── RouteForm.jsx
 │   └── Sidebar/        # Navigation sidebar
@@ -84,6 +86,37 @@ src/
 └── styles/             # Global SCSS styles
 ```
 
+## Google Maps Integration
+
+The UI includes Google Maps visualization for displaying generated routes.
+
+### Features
+
+- **Route Visualization**: Displays driving routes as polylines on an interactive map
+- **Markers**: Shows start (A) and end (B) markers for routes
+- **Auto-centering**: Automatically centers and zooms the map to show the complete route
+- **Polyline Decoding**: Decodes Google's encoded polyline format from backend responses
+
+### Dependencies
+
+- **@react-google-maps/api**: React wrapper for Google Maps JavaScript API
+  - Installed automatically with `npm install`
+  - Provides `GoogleMap`, `Polyline`, and `Marker` components
+  - Handles Google Maps script loading and lifecycle
+
+### Setup Requirements
+
+1. **Google Maps API Key**: Must be configured in `.env` as `REACT_APP_GOOGLE_MAPS_API_KEY`
+2. **Maps JavaScript API**: Must be enabled in Google Cloud Console for your API key
+3. **Geometry Library**: Automatically loaded for polyline decoding
+
+### Component
+
+**MapDisplay** (`src/components/MapDisplay.jsx`)
+- Accepts `routeData` prop containing encoded polyline
+- Handles both direct route responses and wrapped destination responses
+- Displays loading state while Google Maps initializes
+
 ## Backend Integration
 
 ### Connection Setup
@@ -100,13 +133,21 @@ src/
 
 ## Environment Variables
 
-Create a `.env` file in the root directory (optional):
+Create a `.env` file in the root directory with the following variables:
 
 ```env
 REACT_APP_BASE_URL=http://localhost:5001
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
 ```
 
-If not set, the application defaults to `http://localhost:5001`.
+### Configuration Details
+
+- **REACT_APP_BASE_URL**: Backend API URL (defaults to `http://localhost:5001` if not set)
+- **REACT_APP_GOOGLE_MAPS_API_KEY**: Google Maps API key for map visualization
+  - Required for displaying routes on Google Maps
+  - Must have **Maps JavaScript API** enabled in Google Cloud Console
+  - Should be the same API key configured in the backend (`application.yaml`)
+  - Obtain from [Google Cloud Console](https://console.cloud.google.com/)
 
 ## API Integration Layer
 
