@@ -6,18 +6,20 @@ import {
     findAmenitiesByTypes, findNearbyAmenity,
     generateRandomDestination,
     generateRoute,
-    getServerHealth
+    getServerHealth,
+    getAIPOIs
 } from '../../components/API/API';
 import { v4 as uuidv4 } from 'uuid';
 import './RoutePlannerPage.scss';
 import NearestAmenityForm from "../../components/NearestAmenityForm/NearestAmenityForm";
-import MapDisplay from "../../components/MapDisplay";
+import MapDisplay from "../../components/Map Display/MapDisplay";
 
 export function RoutePlannerPage(props) {
     const { sideBarOpen, alert } = props;
     const [loadingRoute, setLoadingRoute] = useState(false);
     const [loadingAmenity, setLoadingAmenity] = useState(false);
     const [generatedRoute, setGeneratedRoute] = useState();
+    const [routeAddresses, setRouteAddresses] = useState(); // Store original addresses
     const [amenities, setAmenities] = useState();
     const [health, setHealth] = useState();
     const [healthError, setHealthError] = useState();
@@ -51,24 +53,47 @@ export function RoutePlannerPage(props) {
 
         // Check which destination type was selected
         if (data.destinationType === 'random') {
-            // Random destination
+            // Random destination - waypoints not supported
+            if (data.waypoints && data.waypoints.length > 0) {
+                const msgPayload = {
+                    id: uuidv4(),
+                    type: 'warn',
+                    message: 'Waypoints are not supported for random destination routes.',
+                };
+                alert(msgPayload);
+                setLoadingRoute(false);
+                return;
+            }
             const payload = {
                 origin: data.originAddress,
                 radius: data.radius,
             };
             [success, result] = await generateRandomDestination(payload);
         } else {
-            // Manual destination
+            // Manual destination with optional waypoints
             const payload = {
                 origin: data.originAddress,
                 destination: data.destinationAddress,
-                waypoints: []
+                waypoints: data.waypoints || []
             };
             [success, result] = await generateRoute(payload);
         }
 
         if (success) {
             setGeneratedRoute(result);
+            // Store original addresses for AI POI search
+            if (data.destinationType === 'manual') {
+                setRouteAddresses({
+                    origin: data.originAddress,
+                    destination: data.destinationAddress
+                });
+            } else {
+                // For random destination, store what we have
+                setRouteAddresses({
+                    origin: data.originAddress,
+                    destination: result.destination || result.routeDetails?.destination
+                });
+            }
             const msgPayload =  {
                 id: uuidv4(),
                 type: 'success',
@@ -91,17 +116,23 @@ export function RoutePlannerPage(props) {
 
         let success, result;
 
-        // Check which destination type was selected
-        if (originType !== 'manual') {
+        // Check if AI mode is selected
+        if (originType === 'ai') {
+            // AI-powered POI suggestions
+            console.log('AI POI Request Data:', JSON.stringify(data, null, 2));
+            [success, result] = await getAIPOIs(data);
+            console.log('AI POI Response Success:', success);
+            console.log('AI POI Response Result:', JSON.stringify(result, null, 2));
+        } else if (originType !== 'manual') {
             // Amenities based on current location
             [success, result] = await findAmenitiesByCurrentLocation(data);
         } else {
+            // Standard manual location mode
             if (singleType) {
                 [success, result] = await findNearbyAmenity(data);
             } else {
                 [success, result] = await findAmenitiesByTypes(data);
             }
-
         }
 
         if (success) {
@@ -109,7 +140,7 @@ export function RoutePlannerPage(props) {
             const msgPayload =  {
                 id: uuidv4(),
                 type: 'success',
-                message: 'Amenities found successfully!',
+                message: originType === 'ai' ? 'AI POI suggestions found successfully!' : 'Amenities found successfully!',
             };
             alert(msgPayload);
         } else {
@@ -158,6 +189,7 @@ export function RoutePlannerPage(props) {
                                         onSubmit={submitAmenityHandler}
                                         loading={loadingAmenity}
                                         updateAmenity={setAmenities}
+                                        routeAddresses={routeAddresses}
                                     />
 
                                     {amenities && (

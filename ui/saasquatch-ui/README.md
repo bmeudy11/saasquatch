@@ -54,7 +54,7 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc.) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
 You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
@@ -70,6 +70,8 @@ src/
 │   │   └── MapDisplay.jsx
 │   ├── RouteForm/      # Route form component
 │   │   └── RouteForm.jsx
+│   ├── NearestAmenityForm/  # Amenity search form
+│   │   └── NearestAmenityForm.jsx
 │   └── Sidebar/        # Navigation sidebar
 ├── pages/              # Page components (routes)
 │   ├── Home/           # Home page
@@ -93,7 +95,8 @@ The UI includes Google Maps visualization for displaying generated routes.
 ### Features
 
 - **Route Visualization**: Displays driving routes as polylines on an interactive map
-- **Markers**: Shows start (A) and end (B) markers for routes
+- **Markers**: Shows start (A), waypoints (B, C, D...), and destination markers for routes
+- **Waypoint Geocoding**: Automatically geocodes waypoint addresses to display markers at correct locations
 - **Auto-centering**: Automatically centers and zooms the map to show the complete route
 - **Polyline Decoding**: Decodes Google's encoded polyline format from backend responses
 
@@ -112,10 +115,12 @@ The UI includes Google Maps visualization for displaying generated routes.
 
 ### Component
 
-**MapDisplay** (`src/components/MapDisplay.jsx`)
-- Accepts `routeData` prop containing encoded polyline
+**MapDisplay** (`src/components/Map Display/MapDisplay.jsx`)
+- Accepts `routeData` prop containing encoded polyline and waypoints
+- Geocodes waypoint addresses to display markers at correct locations
 - Handles both direct route responses and wrapped destination responses
 - Displays loading state while Google Maps initializes
+- Shows sequential marker labels (A, B, C, D...) for origin, waypoints, and destination
 
 ## Backend Integration
 
@@ -224,6 +229,16 @@ Located in `src/components/API/API.js`, this file contains:
   }
   ```
 
+**`findAmenitiesByCurrentLocation(amenityData)`**
+- Finds amenities using built-in WiFi-based geolocation
+- Parameters:
+  ```javascript
+  {
+    radius: 1500,                   // Search radius in meters
+    type: "restaurant"              // Amenity type (single type)
+  }
+  ```
+
 #### AI Endpoints
 
 **`getAIPOIs(poiData)`**
@@ -236,26 +251,6 @@ Located in `src/components/API/API.js`, this file contains:
     query: "coffee shops"           // Optional natural language query
   }
   ```
-
-### Using the API Functions
-
-```javascript
-import { generateRoute } from './components/API/API';
-
-const handleGenerateRoute = async () => {
-  const [success, data] = await generateRoute({
-    origin: "Charleston, SC",
-    destination: "Atlanta, GA",
-    waypoints: []
-  });
-
-  if (success) {
-    console.log("Route:", data);
-  } else {
-    console.error("Error:", data);
-  }
-};
-```
 
 ## Custom Hooks
 
@@ -288,20 +283,70 @@ Reusable form component for route planning input. Used in the RoutePlannerPage f
 - Origin selection: Manual address entry or WiFi-based geolocation
 - Destination selection: Manual address entry or radius-based search
 - Radius input for destination search (in feet, displays conversion to miles)
+- **Waypoint management** (manual destination only):
+  - Add multiple waypoints by entering addresses
+  - Remove individual waypoints
+  - View numbered list of current waypoints
+  - Waypoints included in route generation
+  - Helpful message when waypoints unavailable (radius-based routes)
 - Form validation with alert notifications
-- Clear functionality
+- Clear functionality (clears origin, destination, and waypoints)
+
+### NearestAmenityForm
+
+Reusable form component for finding amenities near locations or along routes.
+
+**Location**: `src/components/NearestAmenityForm/NearestAmenityForm.jsx`
+
+**Props**:
+- `onSubmit(originType, singleType, formData)` - Callback function when form is submitted
+- `loading` - Boolean to disable form during processing
+- `alert` - Alert handler function for displaying notifications
+- `routeAddresses` - Optional route addresses object `{ origin, destination }` for AI mode auto-population
+
+**Features**:
+
+**Standard Amenity Mode**:
+- Location selection: Manual lat/lng entry or WiFi-based geolocation
+- Amenity type selection: Multi-select dropdown with predefined Google Places types
+- Search radius input (in feet)
+- Supports single or multiple amenity type searches
+
+**Custom Amenity (AI) Mode**:
+- AI-powered POI suggestions using natural language queries
+- Origin and destination address inputs
+- **Auto-population**: Automatically fills origin/destination from generated routes
+- Natural language query input (e.g., "coffee shops", "gas stations", "scenic viewpoints")
+- Uses Google Gemini AI to parse queries into Google Places types
+- Visual indicator when route addresses are auto-filled
+- Finds POIs along the route between origin and destination
+
+**UI/UX Features**:
+- Radio toggle between Standard and AI modes
+- Helpful messages when features are unavailable
+- Form validation with clear error messages
+- Clear functionality to reset all fields
 
 ### RoutePlannerPage
 
-API endpoint testing page for destination generation.
+Main application page for route planning and amenity search.
 
 **Location**: `src/pages/RoutePlanner/RoutePlannerPage.jsx`
 
 **Features**:
 - Server health status indicator
-- RouteForm integration for testing `/destination/generateDestination` endpoint
-- Displays raw JSON response from API
-- Real-time loading states
+- **Route Planning Section**:
+  - RouteForm integration for generating routes with waypoints
+  - Displays generated route data and interactive Google Maps visualization
+  - Stores route addresses for use in amenity search
+- **Amenity Search Section**:
+  - NearestAmenityForm integration for finding POIs
+  - Standard mode: Search by location and predefined amenity types
+  - AI mode: Natural language POI search along routes
+  - Auto-populates origin/destination from generated routes
+- Side-by-side form layout for seamless workflow
+- Real-time loading states and error handling
+- Alert notifications for user feedback
 
 ## Learn More
 

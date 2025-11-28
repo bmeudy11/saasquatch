@@ -18,6 +18,7 @@ function MapDisplay({ routeData }) {
 
     const [decodedPath, setDecodedPath] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 32.7765, lng: -79.9311 }); // Default: Charleston, SC
+    const [waypointPositions, setWaypointPositions] = useState([]);
 
     const mapContainerStyle = {
         width: '100%',
@@ -64,6 +65,39 @@ function MapDisplay({ routeData }) {
             console.log('Missing data for polyline rendering');
         }
     }, [routeData, isLoaded]); // Re-run when routeData or Google Maps loads
+
+    // Geocode waypoint addresses to get their coordinates
+    useEffect(() => {
+        if (!window.google || !window.google.maps || !routeData?.waypoints) {
+            setWaypointPositions([]);
+            return;
+        }
+
+        const geocoder = new window.google.maps.Geocoder();
+        const waypoints = routeData.waypoints || [];
+
+        // Geocode all waypoint addresses
+        Promise.all(
+            waypoints.map(address =>
+                new Promise((resolve) => {
+                    geocoder.geocode({ address: address }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            resolve({
+                                lat: results[0].geometry.location.lat(),
+                                lng: results[0].geometry.location.lng(),
+                                address: address
+                            });
+                        } else {
+                            console.error('Geocoding failed for:', address, status);
+                            resolve(null);
+                        }
+                    });
+                })
+            )
+        ).then(positions => {
+            setWaypointPositions(positions.filter(p => p !== null));
+        });
+    }, [routeData?.waypoints, isLoaded]);
 
     if (loadError) {
         return <div className="map-error">Error loading maps</div>;
@@ -113,9 +147,25 @@ function MapDisplay({ routeData }) {
                         label="A"
                         title={routeData.origin || routeData.routeDetails?.origin}
                     />
+
+                    {/* Add markers for waypoints */}
+                    {waypointPositions.map((waypoint, index) => {
+                        // Label waypoints as B, C, D, etc.
+                        const label = String.fromCharCode(66 + index); // B is char code 66
+
+                        return (
+                            <Marker
+                                key={index}
+                                position={{ lat: waypoint.lat, lng: waypoint.lng }}
+                                label={label}
+                                title={waypoint.address}
+                            />
+                        );
+                    })}
+
                     <Marker
                         position={decodedPath[decodedPath.length - 1]}
-                        label="B"
+                        label={String.fromCharCode(66 + waypointPositions.length)}
                         title={routeData.destination || routeData.routeDetails?.destination}
                     />
                 </>

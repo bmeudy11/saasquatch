@@ -67,10 +67,10 @@ RouteScout requires API keys for Google Gemini and Google Maps services. These s
 
 ### Required API Keys
 
-| Key | Description | How to Obtain | Required APIs |
-|-----|-------------|---------------|---------------|
-| Google API Key | Google Gemini API key for AI-powered location suggestions | [Google AI Studio](https://makersuite.google.com/app/apikey) | Gemini API |
-| Google Maps API Key | Google Maps API key for route generation, directions, and map visualization | [Google Cloud Console](https://console.cloud.google.com/) | Directions API, Places API (New), **Maps JavaScript API** |
+| Key | Description | How to Obtain | Required APIs                                         |
+|-----|-------------|---------------|-------------------------------------------------------|
+| Google API Key | Google Gemini API key for AI-powered location suggestions | [Google AI Studio](https://makersuite.google.com/app/apikey) | Gemini API                                            |
+| Google Maps API Key | Google Maps API key for route generation, directions, and map visualization | [Google Cloud Console](https://console.cloud.google.com/) | Directions API, Places API (New), Maps JavaScript API |
 
 ### Setting API Keys
 
