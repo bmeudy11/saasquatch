@@ -68,7 +68,7 @@ function MapDisplay({ routeData }) {
 
     // Geocode waypoint addresses to get their coordinates
     useEffect(() => {
-        if (!window.google || !window.google.maps || !routeData?.waypoints) {
+        if (!isLoaded || !window.google || !window.google.maps || !routeData?.waypoints) {
             setWaypointPositions([]);
             return;
         }
