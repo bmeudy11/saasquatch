@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleMap, Polyline, Marker, useJsApiLoader } from '@react-google-maps/api';
 
 // Define libraries array as constant to prevent reloading
-const libraries = ['geometry'];
+const libraries = ['geometry', 'places'];
 
 /**
  * MapDisplay Component
@@ -13,7 +13,7 @@ const libraries = ['geometry'];
 function MapDisplay({ routeData }) {
     const { isLoaded, loadError } = useJsApiLoader({
         googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "",
-        libraries: libraries, // Required for polyline decoding
+        libraries, // Required for polyline decoding
     });
 
     const [decodedPath, setDecodedPath] = useState(null);

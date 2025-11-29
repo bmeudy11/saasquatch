@@ -142,6 +142,28 @@ strong {
   transform: scale(0.95);
 }
 
+.remove-button {
+  width: 24px;
+  height: 24px;
+  background-color: colors.$error-color;
+  color: colors.$main-font;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.4em;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: colors.$error-hover-color;
+    color: colors.$hover-font
+  }
+
+  &:active {
+    background-color: colors.$error-active-color;
+    color: colors.$active-font
+  }
+}
+
 .info-message {
   margin: 0 auto;
   padding: 10px;
@@ -214,7 +236,6 @@ tr:nth-child(even) td {
 
 th {
   background-color: colors.$table-header-bg;
-  font-weight: normal;
   text-align: center;
   font-weight: bold;
 }
@@ -284,41 +305,4 @@ tfoot {
 }
 .MuiLinearProgress-barColorPrimary {
   background-color: colors.$bg1 !important;
-}
-
-@media only all and (min-device-width: 641px) and (max-device-width: 1024px) and (orientation: portrait) {
-  th, td {
-    white-space: normal;
-  }
-}
-
-@media only all and (max-width: 640px) {
-  main {
-    display: block;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-  }
-
-  html, body, main {
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    overflow: auto;
-  }
-
-  .main-button {
-    padding: 5px 10px;
-    margin: 10px 12px;
-    font-family: 'Avenir Heavy' !important;
-  }
-
-  .instrument-button {
-    color: colors.$secondary-font;
-    font-family: 'Avenir Regular';
-  }
-
-  th, td {
-    white-space: normal;
-  }
 }

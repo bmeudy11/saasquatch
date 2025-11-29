@@ -170,3 +170,49 @@
     padding: 7px;
   }
 }
+
+.waypoint-card {
+  margin-top: 1.5em;
+  padding: 1em;
+  background-color: colors.$form-color;
+  border-radius: 8px;
+
+  h3 {
+    margin-bottom: 0.75em;
+    font-size: 1em;
+    color: colors.$secondary-font;
+  }
+
+  div {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    padding: 0.75em;
+    margin-bottom: 0.5em;
+    background-color: colors.$main-border;
+    border: 1px solid colors.$secondary-border;
+    border-radius: 6px;
+
+    .waypoint-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background-color: colors.$bg1;
+      color: colors.$main-font;
+      border-radius: 50%;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+
+    .waypoint-display {
+      flex: 1;
+      font-size: 0.95em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: colors.$secondary-font;
+    }
+  }
+}

@@ -3,15 +3,20 @@
 
 .alert-banner {
     padding: 12px;
-    margin: 10px 0;
+    margin: 10px auto;
     border-radius: 10px;
-    width: 100%;
+    width: fit-content;
     color: colors.$main-font;
     text-align: left;
 
     h2 {
         margin-bottom: 0 !important;
         width: fit-content;
+    }
+
+    p {
+      margin: 0 !important;
+      text-align: left;
     }
 
     &.success {
@@ -52,6 +57,14 @@
           colors.$info-color
         );
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    &.slim {
+      padding: 5px;
+
+      h2 {
+        font-size: larger;
+      }
     }
 
     .alert-banner-icons {
