@@ -70,12 +70,12 @@ export function Home(props) {
                 <div id="home-content" className="home-content">
                     <div id="home-content-left">
                         <h1>Welcome to SaaSquatch!</h1>
-                        <p>Slogan???</p>
+                        <p>Route Scout: Plan it out!</p>
                         <div>
                             <img src={placeholder} alt='image-placeholder' style={sideBarOpen ? {width: arcadeWidth} : {}} />
                         </div>
-                        <Link to="/api-dashboard">
-                            <button className="main-button">API</button>
+                        <Link to="/plan-a-route">
+                            <button className="main-button">Route Planner</button>
                         </Link>
                     </div>
                     <div id="home-content-right" className={sideBarOpen ? 'open' : ''}>

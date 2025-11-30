@@ -67,10 +67,10 @@ RouteScout requires API keys for Google Gemini and Google Maps services. These s
 
 ### Required API Keys
 
-| Key | Description | How to Obtain |
-|-----|-------------|---------------|
-| Google API Key | Google Gemini API key for AI-powered location suggestions | [Google AI Studio](https://makersuite.google.com/app/apikey) |
-| Google Maps API Key | Google Maps API key for route generation and directions | [Google Cloud Console](https://console.cloud.google.com/) |
+| Key | Description | How to Obtain | Required APIs                                         |
+|-----|-------------|---------------|-------------------------------------------------------|
+| Google API Key | Google Gemini API key for AI-powered location suggestions | [Google AI Studio](https://makersuite.google.com/app/apikey) | Gemini API                                            |
+| Google Maps API Key | Google Maps API key for route generation, directions, and map visualization | [Google Cloud Console](https://console.cloud.google.com/) | Directions API, Places API (New), Maps JavaScript API |
 
 ### Setting API Keys
 
@@ -95,6 +95,18 @@ google:
   maps:
     key: your_google_maps_api_key_here
 ```
+
+**For Frontend (React UI)**:
+Create or edit `ui/saasquatch-ui/.env`:
+```env
+REACT_APP_BASE_URL=http://localhost:5001
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+```
+
+**Important Notes**:
+- The frontend `REACT_APP_GOOGLE_MAPS_API_KEY` should use the same Google Maps API key as the backend
+- Ensure **Maps JavaScript API** is enabled in your Google Cloud Console for map visualization to work
+- The frontend API key is used for client-side map rendering with the `@react-google-maps/api` library
 
 **Security Note**: Never commit API keys to version control. Add these configuration files to `.gitignore` or use environment-specific configurations.
 
@@ -142,7 +154,7 @@ You should now have RouteScout running locally!
 
 ## Running the Frontend
 
-The RouteScout React UI provides a user-friendly interface for interacting with the backend API.
+The RouteScout React UI provides a user-friendly interface for interacting with the backend API, including Google Maps visualization for routes.
 
 ### 1. Navigate to the UI Directory
 
@@ -156,7 +168,24 @@ cd ui/saasquatch-ui
 npm install
 ```
 
-### 3. Start the Development Server
+This will install all required packages including:
+- React and core dependencies
+- `@react-google-maps/api` for Google Maps integration
+- Axios for API calls
+- SASS for styling
+
+### 3. Configure Environment Variables
+
+Create a `.env` file in the `ui/saasquatch-ui/` directory with your API keys:
+
+```env
+REACT_APP_BASE_URL=http://localhost:5001
+REACT_APP_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
+```
+
+See the [API Configuration](#api-configuration) section for details on obtaining API keys.
+
+### 4. Start the Development Server
 
 ```bash
 npm start
@@ -164,7 +193,7 @@ npm start
 
 The UI will start on port `3000` and automatically open in your browser at [http://localhost:3000](http://localhost:3000).
 
-### 4. Connecting to the Backend
+### 5. Connecting to the Backend
 
 Ensure the backend is running on port `5001` before using the UI. The frontend will make API calls to `http://localhost:5001`.
 

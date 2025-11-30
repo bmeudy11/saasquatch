@@ -35,7 +35,7 @@ api.interceptors.response.use(
     }
 );
 
-//Helper for request handling, DRY
+// Helper for request handling, DRY
 const handleRequest = async (requestFn) => {
     try {
         const response = await requestFn();
@@ -46,7 +46,15 @@ const handleRequest = async (requestFn) => {
     }
 };
 
-/* ROUTE ENDPOINTS
+/** HEALTH ENDPOINT
+ * Get the current health status of the server
+ * @returns {Promise<[boolean, object]>} [success, {data - see swagger for response object}]
+ */
+export const getServerHealth = async () => {
+    return handleRequest(() => api.get('/status/health'));
+};
+
+/** ROUTE ENDPOINTS
  * Generate a route with Google Maps
  * @param {Object} routeData
  * @param {string} routeData.origin - Starting location (e.g., "Charleston, SC")
@@ -64,7 +72,23 @@ export const generateRoute = async (routeData) => {
     );
 };
 
-/* AMENITY ENDPOINTS
+/**
+ * Generate a random destination and route from an origin
+ * @param {Object} destinationData
+ * @param {string} destinationData.origin - Starting location (e.g., "Charleston, SC")
+ * @param {number} destinationData.radius - Radius in feet to search for random destination
+ * @returns {Promise<[boolean, object]>} [success, data with destination and route info]
+ */
+export const generateRandomDestination = async (destinationData) => {
+    return handleRequest(() =>
+        api.post('/destination/generateDestination', {
+            origin: destinationData.origin,
+            radius: destinationData.radius
+        })
+    );
+};
+
+/** AMENITY ENDPOINTS
  * Find amenities near a specific location
  * @param {Object} amenityData
  * @param {number} amenityData.latitude
@@ -84,7 +108,7 @@ export const findNearbyAmenity = async (amenityData) => {
     );
 };
 
-/* Find multiple types of amenities near a location
+/** Find multiple types of amenities near a location
  * @param {Object} amenityData
  * @param {number} amenityData.latitude
  * @param {number} amenityData.longitude
@@ -103,8 +127,30 @@ export const findAmenitiesByTypes = async (amenityData) => {
     );
 };
 
+/** Find amenities near a current location
+ * @param {Object} amenityData
+ * @param {number} amenityData.radius - Search radius in meters
+ * @param {string} amenityData.type - Type of amenity (e.g., "restaurant", "gas_station")
+ * @returns {Promise<[boolean, object]>} [success, data]
+ */
+export const findAmenitiesByCurrentLocation = async (amenityData) => {
+    return handleRequest(() =>
+        api.post('/nearest/amenity/current-geolocation', {
+            radius: amenityData.radius || 1500,
+            type: amenityData.type
+        })
+    );
+};
 
-/* AI ENDPOINTS (Google Gemini)
+/** GEOLOCATION ENDPOINT
+ * Get current location using WiFi-based geolocation
+ * @returns {Promise<[boolean, object]>} [success, {latitude, longitude, accessPointsUsed}]
+ */
+export const getCurrentLocation = async () => {
+    return handleRequest(() => api.get('/current/geolocation/auto'));
+};
+
+/** AI ENDPOINTS (Google Gemini)
  * Health check for AI service
  * @returns {Promise<[boolean, object]>} [success, data]
  */
@@ -112,9 +158,9 @@ export const checkAIServiceHealth = async () => {
     return handleRequest(() => api.get('/suggest'));
 };
 // I am not implementing the suggest endpoint because we want to have our requests specifically
-//suggested along the route which is what the suggestPOIs endpoint does.
+// suggested along the route which is what the suggestPOIs endpoint does.
 
-/*
+/**
  * Get AI-powered POI suggestions along a route
  * @param {Object} poiData
  * @param {string} poiData.origin - Starting location

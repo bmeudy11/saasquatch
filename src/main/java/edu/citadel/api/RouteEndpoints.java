@@ -152,6 +152,11 @@ public class RouteEndpoints {
         response.setWaypoints(body.getWaypoints());
         response.setInstructions(instructions);
 
+        // Add encoded polyline for map visualization
+        if (result.routes.length > 0 && result.routes[0].overviewPolyline != null) {
+            response.setEncodedPolyline(result.routes[0].overviewPolyline.getEncodedPath());
+        }
+
         return response;
     }
 

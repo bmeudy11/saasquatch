@@ -8,6 +8,7 @@ import { NotFound } from './pages/NotFound/NotFound';
 // import { Account } from './pages/Account/Account';
 import './App.scss';
 import {NotAvailable} from "./pages/NotAvailable/NotAvailable";
+import {RoutePlannerPage} from "./pages/RoutePlanner/RoutePlannerPage";
 
 // Define screen sizes
 const screens = {
@@ -89,9 +90,21 @@ function App() {
                     <Routes>
                         <Route path="/" element={<Navigate to="/home"/>}/>
                         <Route path="/home" element={<Home sideBarOpen={sideBarOpen} />} />
+                        <Route
+                            path="/plan-a-route"
+                            element={
+                                <RoutePlannerPage sideBarOpen={sideBarOpen} alert={openAlertHandler} />
+                            }
+                        />
                         {/* Implement this after auth is complete - protects certain pages from unauthorized access */}
                         {/*<Route element={<PrivateRoute user={user} setUser={userHandler} sideBarOpen={sideBarOpen} />}>*/}
                         {/*    <Route path={"/account"} element={<Account sideBarOpen={sideBarOpen} user={user} />} />*/}
+                        {/*    <Route*/}
+                        {/*        path="/plan-a-route"*/}
+                        {/*        element={*/}
+                        {/*            <RoutePlannerPage sideBarOpen={sideBarOpen} alert={openAlertHandler} />*/}
+                        {/*        }*/}
+                        {/*    />*/}
                         {/*</Route>*/}
                         {/*<Route path="/login" element={<Login sideBarOpen={sideBarOpen} alert={openAlertHandler} />} />*/}
                         <Route path="*" element={<NotFound sideBarOpen={sideBarOpen} />} />

@@ -9,7 +9,7 @@ import './AlertBanner.scss';
 // Alert banner component
 export function AlertBanner(props) {
     // Get props and initalize state variables
-    const { type, message, close, noHeader } = props;
+    const { type, message, close, noHeader, customHeader, width, slim } = props;
     const [success] = useState(type === 'success');
     const [error] = useState(type === 'error');
     const [warn] = useState(type === 'warn');
@@ -20,25 +20,61 @@ export function AlertBanner(props) {
         close();
     };
 
+    const BannerData = () => {
+        const types = {
+            success: <FaRegCheckCircle />,
+            error: <MdErrorOutline />,
+            warn: <IoWarningOutline />,
+            info: <AiOutlineInfoCircle />
+        };
+
+        const activeType =
+            success ? 'success' :
+                error ? 'error' :
+                    warn ? 'warn' :
+                        info ? 'info' :
+                            null;
+
+        if (!activeType) return null;
+
+        const Icon = types[activeType];
+
+        if (!noHeader) {
+            const headerText = customHeader
+                ? customHeader
+                : activeType === 'success'
+                    ? 'Success!'
+                    : activeType === 'error'
+                        ? 'Error!'
+                        : activeType === 'warn'
+                            ? 'Warning!'
+                            : 'Info';
+
+            return (
+                <>
+                    <h2>{Icon} {headerText}</h2>
+                    <p>{message}</p>
+                </>
+            );
+        }
+
+        return (
+            <>
+                {Icon} {message}
+            </>
+        );
+    }
+
     return (
         <>
-            <div className={`alert-banner ${type}`}>
+            <div className={`alert-banner ${type} ${slim ? 'slim' : ''}`} style={{width: width}}>
                 {close && (
                     <div className="alert-banner-close" onClick={closeHandler}>
                         <MdClose />
                     </div>
                 )}
-                <IconContext.Provider value={{className: 'alert-banner-icons'}}>
-                    {(!noHeader && success) && <h2><FaRegCheckCircle /> Success!</h2>}
-                    {(!noHeader && error) && <h2><MdErrorOutline /> Error!</h2>}
-                    {(!noHeader && warn) && <h2><IoWarningOutline /> Warning!</h2>}
-                    {(!noHeader && info) && <h2><AiOutlineInfoCircle /> Info</h2>}
-                    {!noHeader && <p>{message}</p>}
-
-                    {(noHeader && success) && <><FaRegCheckCircle /> {message}</>}
-                    {(noHeader && error) && <><MdErrorOutline /> {message}</>}
-                    {(noHeader && warn) && <><IoWarningOutline /> {message}</>}
-                    {(noHeader && info) && <><AiOutlineInfoCircle /> {message}</>}
+                <IconContext.Provider value={{ className: 'alert-banner-icons' }}>
+                    <BannerData />
                 </IconContext.Provider>
             </div>
         </>

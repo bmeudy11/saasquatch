@@ -24,4 +24,6 @@ public class RouteResponse {
     private List<String> waypoints;
 
     private ArrayList<String> instructions;
+
+    private String encodedPolyline;
 }
