@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GoogleMap, Polyline, Marker, useJsApiLoader } from '@react-google-maps/api';
 
 // Define libraries array as constant to prevent reloading
-const libraries = ['geometry'];
+const libraries = ['geometry', 'places'];
 
 /**
  * MapDisplay Component
@@ -13,13 +13,12 @@ const libraries = ['geometry'];
 function MapDisplay({ routeData }) {
     const { isLoaded, loadError } = useJsApiLoader({
         googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "",
-        libraries: libraries, // Required for polyline decoding
+        libraries, // Required for polyline decoding
     });
 
     const [decodedPath, setDecodedPath] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 32.7765, lng: -79.9311 }); // Default: Charleston, SC
     const [waypointPositions, setWaypointPositions] = useState([]);
-    const [currentPolyline, setCurrentPolyline] = useState(null); // Track current polyline for change detection
 
     const mapContainerStyle = {
         width: '100%',
@@ -43,13 +42,6 @@ function MapDisplay({ routeData }) {
         console.log('Google loaded?', !!window.google);
         console.log('Geometry loaded?', !!window.google?.maps?.geometry);
 
-        // If polyline changed, clear the old path first
-        if (polyline !== currentPolyline) {
-            console.log('Polyline changed, clearing old path');
-            setDecodedPath(null);
-            setCurrentPolyline(polyline);
-        }
-
         // Check if Google Maps AND the geometry library are loaded
         if (routeData && polyline && window.google && window.google.maps && window.google.maps.geometry) {
             try {
@@ -68,33 +60,21 @@ function MapDisplay({ routeData }) {
                 }
             } catch (error) {
                 console.error('Error decoding polyline:', error);
-                setDecodedPath(null); // Clear on error
             }
-        } else if (!polyline) {
+        } else {
             console.log('Missing data for polyline rendering');
-            // Clear old path when no valid polyline data
-            setDecodedPath(null);
         }
-    }, [routeData, isLoaded, currentPolyline]); // Re-run when routeData or Google Maps loads
+    }, [routeData, isLoaded]); // Re-run when routeData or Google Maps loads
 
     // Geocode waypoint addresses to get their coordinates
     useEffect(() => {
-        console.log('=== WAYPOINT GEOCODING EFFECT ===');
-        console.log('isLoaded:', isLoaded);
-        console.log('window.google?.maps:', !!window.google?.maps);
-        console.log('routeData:', routeData);
-        console.log('routeData.waypoints:', routeData?.waypoints);
-
-        if (!isLoaded || !window.google?.maps || !routeData?.waypoints) {
-            console.log('Skipping waypoint geocoding - conditions not met');
+        if (!isLoaded || !window.google || !window.google.maps || !routeData?.waypoints) {
             setWaypointPositions([]);
             return;
         }
 
-        console.log('Starting waypoint geocoding...');
         const geocoder = new window.google.maps.Geocoder();
         const waypoints = routeData.waypoints || [];
-        console.log('Waypoints to geocode:', waypoints);
 
         // Geocode all waypoint addresses
         Promise.all(
@@ -148,9 +128,8 @@ function MapDisplay({ routeData }) {
             zoom={10}
         >
             {/* Draw the route as a blue polyline */}
-            {decodedPath && decodedPath.length > 0 && (
+            {decodedPath && (
                 <Polyline
-                    key={currentPolyline}
                     path={decodedPath}
                     options={{
                         strokeColor: '#2196F3',

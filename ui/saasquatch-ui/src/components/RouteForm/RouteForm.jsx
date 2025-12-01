@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getCurrentLocation } from '../API/API';
 import { v4 as uuidv4 } from 'uuid';
+import {AlertBanner} from "../Alerts/AlertBanner";
 
 /**
  * RouteForm Component
@@ -275,17 +276,16 @@ export default function RouteForm(props) {
                     </div>
 
                     {waypoints.length > 0 && (
-                        <div style={{marginTop: '1.5em', padding: '1em', backgroundColor: '#E3E3E3', borderRadius: '8px'}}>
-                            <h3 style={{margin: '0 0 0.75em 0', fontSize: '1em', color: '#111111'}}>Current Waypoints ({waypoints.length}):</h3>
+                        <div className="waypoint-card">
+                            <h3>Current Waypoints ({waypoints.length}):</h3>
                             {waypoints.map((waypoint, index) => (
-                                <div key={index} style={{display: 'flex', alignItems: 'center', gap: '0.75em', padding: '0.75em', marginBottom: '0.5em', backgroundColor: 'white', border: '1px solid #C1C1C1', borderRadius: '6px'}}>
-                                    <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '24px', height: '24px', backgroundColor: '#154734', color: '#F8F9F8', borderRadius: '50%', fontSize: '0.85em', fontWeight: 'bold'}}>{index + 1}</span>
-                                    <span style={{flex: 1, fontSize: '0.95em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#111111'}}>{waypoint}</span>
+                                <div>
+                                    <span className="waypoint-number">{index + 1}</span>
+                                    <span className="waypoint-display">{waypoint}</span>
                                     <button
                                         type="button"
+                                        className="remove-button"
                                         onClick={() => handleRemoveWaypoint(index)}
-                                        style={{width: '24px', height: '24px', backgroundColor: '#DB3131', color: '#F8F9F8', border: 'none', borderRadius: '50%', fontSize: '1.4em', lineHeight: '1', cursor: 'pointer'}}
-                                        title="Remove waypoint"
                                     >
                                         ×
                                     </button>
@@ -295,18 +295,13 @@ export default function RouteForm(props) {
                     )}
                     </>
                 ) : (
-                    <div style={{
-                        padding: '1em',
-                        backgroundColor: '#FFF3CD',
-                        border: '1px solid #FFE69C',
-                        borderRadius: '8px',
-                        color: '#856404'
-                    }}>
-                        <p style={{margin: 0, fontSize: '0.95em'}}>
-                            <strong>ℹ️ Note:</strong> Waypoints are not supported for radius-based random destination routes.
-                            To use waypoints, select "Enter Address" for your destination.
-                        </p>
-                    </div>
+                    <AlertBanner
+                        noHeader
+                        type="info"
+                        width={400}
+                        message={'Note: Waypoints are not supported for radius-based random destination routes. ' +
+                            'To use waypoints, select "Enter Address" for your destination.'}
+                    />
                 )}
             </div>
 

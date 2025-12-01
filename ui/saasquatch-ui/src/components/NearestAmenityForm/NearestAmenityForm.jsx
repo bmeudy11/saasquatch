@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import  { PlaceTypes } from '../../utils/PlaceTypes';
+import {AlertBanner} from "../Alerts/AlertBanner";
 
 /**
  * NearestAmenityForm Component
@@ -271,21 +272,15 @@ export default function NearestAmenityForm(props) {
                 {/* AI CUSTOM AMENITY MODE */}
                 {amenityMode === 'ai' && (
                     <>
-                        <p style={{margin: '0 0 1em 0', fontSize: '0.9em', color: '#555'}}>
-                            Use natural language to find POIs along your route
-                        </p>
+                        <h3>Use natural language to find POIs along your route</h3>
 
                         {routeAddresses && (
-                            <div style={{
-                                padding: '0.75em',
-                                backgroundColor: '#E8F5E9',
-                                borderRadius: '4px',
-                                marginBottom: '1em',
-                                fontSize: '0.85em',
-                                color: '#2E7D32'
-                            }}>
-                                <strong>✓ Route detected:</strong> Origin and destination auto-filled from your generated route
-                            </div>
+                            <AlertBanner
+                                type="success"
+                                slim
+                                customHeader="Route detected"
+                                message="Origin and destination auto-filled from your generated route"
+                            />
                         )}
 
                         <input
@@ -304,8 +299,9 @@ export default function NearestAmenityForm(props) {
                             className="address-input"
                         />
 
-                        <input
-                            type="text"
+                        <textarea
+                            rows="5"
+                            cols="40"
                             placeholder="What are you looking for? (e.g., coffee shops, scenic viewpoints)"
                             value={aiQuery}
                             onChange={(e) => setAiQuery(e.target.value)}
