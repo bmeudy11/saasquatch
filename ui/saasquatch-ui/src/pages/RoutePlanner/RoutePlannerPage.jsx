@@ -208,7 +208,10 @@ export function RoutePlannerPage(props) {
                                     <pre>{JSON.stringify(generatedRoute, null, 4)}</pre>
 
                                     <h3>Route Map:</h3>
-                                    <MapDisplay routeData={generatedRoute} />
+                                    <MapDisplay
+                                        key={generatedRoute.encodedPolyline || generatedRoute.routeDetails?.encodedPolyline}
+                                        routeData={generatedRoute}
+                                    />
                                 </div>
                             )}
                         </div>

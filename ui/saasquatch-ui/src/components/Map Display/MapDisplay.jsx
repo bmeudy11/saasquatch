@@ -19,6 +19,7 @@ function MapDisplay({ routeData }) {
     const [decodedPath, setDecodedPath] = useState(null);
     const [mapCenter, setMapCenter] = useState({ lat: 32.7765, lng: -79.9311 }); // Default: Charleston, SC
     const [waypointPositions, setWaypointPositions] = useState([]);
+    const [currentPolyline, setCurrentPolyline] = useState(null); // Track current polyline for change detection
 
     const mapContainerStyle = {
         width: '100%',
@@ -42,6 +43,13 @@ function MapDisplay({ routeData }) {
         console.log('Google loaded?', !!window.google);
         console.log('Geometry loaded?', !!window.google?.maps?.geometry);
 
+        // If polyline changed, clear the old path first
+        if (polyline !== currentPolyline) {
+            console.log('Polyline changed, clearing old path');
+            setDecodedPath(null);
+            setCurrentPolyline(polyline);
+        }
+
         // Check if Google Maps AND the geometry library are loaded
         if (routeData && polyline && window.google && window.google.maps && window.google.maps.geometry) {
             try {
@@ -60,21 +68,33 @@ function MapDisplay({ routeData }) {
                 }
             } catch (error) {
                 console.error('Error decoding polyline:', error);
+                setDecodedPath(null); // Clear on error
             }
-        } else {
+        } else if (!polyline) {
             console.log('Missing data for polyline rendering');
+            // Clear old path when no valid polyline data
+            setDecodedPath(null);
         }
-    }, [routeData, isLoaded]); // Re-run when routeData or Google Maps loads
+    }, [routeData, isLoaded, currentPolyline]); // Re-run when routeData or Google Maps loads
 
     // Geocode waypoint addresses to get their coordinates
     useEffect(() => {
-        if (!window.google || !window.google.maps || !routeData?.waypoints) {
+        console.log('=== WAYPOINT GEOCODING EFFECT ===');
+        console.log('isLoaded:', isLoaded);
+        console.log('window.google?.maps:', !!window.google?.maps);
+        console.log('routeData:', routeData);
+        console.log('routeData.waypoints:', routeData?.waypoints);
+
+        if (!isLoaded || !window.google?.maps || !routeData?.waypoints) {
+            console.log('Skipping waypoint geocoding - conditions not met');
             setWaypointPositions([]);
             return;
         }
 
+        console.log('Starting waypoint geocoding...');
         const geocoder = new window.google.maps.Geocoder();
         const waypoints = routeData.waypoints || [];
+        console.log('Waypoints to geocode:', waypoints);
 
         // Geocode all waypoint addresses
         Promise.all(
@@ -128,8 +148,9 @@ function MapDisplay({ routeData }) {
             zoom={10}
         >
             {/* Draw the route as a blue polyline */}
-            {decodedPath && (
+            {decodedPath && decodedPath.length > 0 && (
                 <Polyline
+                    key={currentPolyline}
                     path={decodedPath}
                     options={{
                         strokeColor: '#2196F3',
